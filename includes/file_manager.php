@@ -39,44 +39,38 @@ class FileManager
         $zip = "/photo{$date}.zip";
 
         //Descargar los archivos
-        $this->downloadFile($residentialFile,DIR_NAME_TEMP);
-        $this->downloadFile($commercialFile,DIR_NAME_TEMP);
-        $this->downloadFile($zip,DIR_NAME_TEMP);
+        $this->download_file($residentialFile,DIR_NAME_TEMP);
+        $this->download_file($commercialFile,DIR_NAME_TEMP);
+        $this->download_file($zip,DIR_NAME_TEMP);
 
+        //Importar
         $this->import_file($residentialFile,'csv');
         $this->import_file($commercialFile,'csv');
         $this->import_file($zip,'zip');
 
-        // if ($this->downloadFile($residentialFile) && $this->importFile($residentialFile, 'residential')) {
-        //     $this->deleteFile($residentialFile);
-        // }
-
-        // if ($this->downloadFile($commercialFile) && $this->importFile($commercialFile, 'commercial')) {
-        //     $this->deleteFile($commercialFile);
-        // }
-
-        // if ($this->downloadFile($zip) && $this->importFile($zip, 'zip')) {
-        //     $this->deleteFile($zip);
-        // }
+        //Eliminar
+        $this->delete_file($residentialFile);
+        $this->delete_file($commercialFile);
+        $this->delete_file($zip);
 
         echo json_encode([$residentialFile,$commercialFile,$zip]);
         exit;
 
     }
 
-    private function downloadFile($nameFile, $path) 
+    private function download_file($name_file, $path) 
     {
         $response = false;
         $ftp = $this->my_ftp_connect();
         if ($ftp) {
             // Verifica si el archivo existe en el servidor FTP
             $files = ftp_nlist($ftp, '/');
-            if (in_array($nameFile, $files)) {
-                $destination_file = IMPORTMLS_DIR . $path . $nameFile;  // Asegúrate de que el directorio 'csv' existe o créalo.
+            if (in_array($name_file, $files)) {
+                $destination_file = IMPORTMLS_DIR . $path . $name_file;  // Asegúrate de que el directorio 'csv' existe o créalo.
                 if (!file_exists(IMPORTMLS_DIR . $path)) {
                     mkdir(IMPORTMLS_DIR . $path , 0777, true); // Crea el directorio si no existe.
                 }
-                if (ftp_get($ftp, $destination_file, $nameFile, FTP_BINARY)) {
+                if (ftp_get($ftp, $destination_file, $name_file, FTP_BINARY)) {
                     echo "Archivo descargado con éxito: " . $destination_file;                
                     $response = true;
 
@@ -128,6 +122,16 @@ class FileManager
         }
     }
 
+    private function delete_file($name_file)
+    {
+        $file_path = IMPORTMLS_DIR .DIR_NAME_TEMP . $name_file;
+        if (file_exists($file_path)) {
+            unlink($file_path);
+            echo "Archivo eliminado con éxito.";
+        } else {
+            echo "El archivo no existe.";
+        }
+    }
     // Función para procesar el archivo CSV desde FTP
     private function mi_plugin_inmuebles_procesar_csv_desde_ftp() 
     {
