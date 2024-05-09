@@ -104,7 +104,7 @@ function get_post_galery_ids($id_unique ='', $multi_count = 1 ){
 
     for ($i=2; $i <= $multi_count ; $i++) {
         $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
-        $ruta_img = IMPORTMLS_DIR . 'data/'.$id_unique.$ext;
+        $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
         echo $ruta_img;
         if ( file_exists( $ruta_img ) ){
             $imagen_id = cargar_imagen_y_obtener_id($ruta_img);
