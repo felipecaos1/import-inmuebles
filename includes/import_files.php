@@ -101,6 +101,7 @@ function unzipFile($filePath, $extractTo) {
         echo "Error al descomprimir el archivo.";
     }
 }
+
 // Función para procesar el archivo CSV desde FTP
 function mi_plugin_inmuebles_procesar_csv_desde_ftp() {
     $ftp_server = $_POST['ftp_host'];

@@ -21,10 +21,13 @@ define( 'IMPORTMLS_BASENAME', plugin_basename( IMPORTMLS_FILE ) );
 // Includes 
 define( 'DIR_NAME_TEMP', plugin_basename( 'data/temp' ) );//Pasar a la clase correspondiente
 
-require IMPORTMLS_DIR . 'includes/set_mimes.php';
 require IMPORTMLS_DIR . 'includes/load_scripts.php';
 require IMPORTMLS_DIR . 'includes/create_menu.php';
+
 require IMPORTMLS_DIR . 'includes/ftp_config.php';
+
+require IMPORTMLS_DIR . 'includes/set_mimes.php';
+
 require IMPORTMLS_DIR . 'includes/ajax.php';
 require IMPORTMLS_DIR . 'includes/create_inmueble.php';
 require IMPORTMLS_DIR . 'includes/import_files.php';
