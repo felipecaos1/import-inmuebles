@@ -23,14 +23,12 @@ define( 'DIR_NAME_TEMP', plugin_basename( 'data/temp' ) );//Pasar a la clase cor
 
 require IMPORTMLS_DIR . 'includes/load_scripts.php';
 require IMPORTMLS_DIR . 'includes/create_menu.php';
+require IMPORTMLS_DIR . 'includes/set_mimes.php';
 
 require IMPORTMLS_DIR . 'includes/ftp_config.php';
 
-require IMPORTMLS_DIR . 'includes/set_mimes.php';
 
-require IMPORTMLS_DIR . 'includes/ajax.php';
-require IMPORTMLS_DIR . 'includes/create_inmueble.php';
-require IMPORTMLS_DIR . 'includes/import_files.php';
+require IMPORTMLS_DIR . 'includes/file_manager.php';
 
 
 function mi_plugin_importar_inmuebles(){
