@@ -1,37 +1,6 @@
 <?php
-function downloadFile($nameFile, $path) {
-    $ftp = my_ftp_connect();
-    if ($ftp) {
-        // Verifica si el archivo existe en el servidor FTP
-        $files = ftp_nlist($ftp, '/');
-        if (in_array($nameFile, $files)) {
-            $destination_file = IMPORTMLS_DIR . $path . $nameFile;  // Asegúrate de que el directorio 'csv' existe o créalo.
-            if (!file_exists(IMPORTMLS_DIR . $path)) {
-                mkdir(IMPORTMLS_DIR . $path , 0777, true); // Crea el directorio si no existe.
-            }
-            if (ftp_get($ftp, $destination_file, $nameFile, FTP_BINARY)) {
-                echo "Archivo descargado con éxito: " . $destination_file;
-                // Verifica si el archivo es un zip antes de intentar descomprimir
-                if (pathinfo($destination_file, PATHINFO_EXTENSION) === 'zip') {
-                    unzipFile($destination_file, IMPORTMLS_DIR . $path);
-                } else {
-                    echo "El archivo descargado no es un archivo comprimido.";
-                }
-            } else {
-                echo "Error al descargar el archivo.";
-            }
-        } else {
-            echo "Archivo no encontrado en el servidor FTP.";
-        }
-        ftp_close($ftp);
-    } else {
-        echo "Error al conectar al FTP.";
-    }
-}
-
 // conexion ftp
 function my_ftp_connect(){
-
     $ftp_server = get_option('ftp_host');
     $ftp_user = get_option('ftp_user');
     $ftp_pass = get_option('ftp_pass');
@@ -44,6 +13,80 @@ function my_ftp_connect(){
     }else{
         return false;
     }
+}
+
+/**
+ * Funcion para manejar la importacion de los csv res y com, y el zip photo
+ */
+function import_data($date = null)
+{
+    date_default_timezone_set('America/Bogota');
+    set_time_limit(600);
+
+    if($date == null){
+        $date = date('Ymd');
+    }
+
+    $residentialFile = "/res{$date}.csv";
+    $commercialFile = "/com{$date}.csv";
+    $zip = "/photo{$date}.zip";
+
+    // downloadFile($residentialFile,DIR_NAME_TEMP);
+    // downloadFile($commercialFile,DIR_NAME_TEMP);
+    // downloadFile($zip,DIR_NAME_TEMP);
+
+    leer_csv_ajax_handler(DIR_NAME_TEMP.'/'.$residentialFile); // data/csv/res20231016.csv 'data/temp'
+
+    // if ($this->downloadFile($residentialFile) && $this->importFile($residentialFile, 'residential')) {
+    //     $this->deleteFile($residentialFile);
+    // }
+
+    // if ($this->downloadFile($commercialFile) && $this->importFile($commercialFile, 'commercial')) {
+    //     $this->deleteFile($commercialFile);
+    // }
+
+    // if ($this->downloadFile($zip) && $this->importFile($zip, 'zip')) {
+    //     $this->deleteFile($zip);
+    // }
+
+    echo json_encode([$residentialFile,$commercialFile,$zip]);
+    exit;
+
+}
+
+function downloadFile($nameFile, $path) {
+    $response = false;
+    $ftp = my_ftp_connect();
+    if ($ftp) {
+        // Verifica si el archivo existe en el servidor FTP
+        $files = ftp_nlist($ftp, '/');
+        if (in_array($nameFile, $files)) {
+            $destination_file = IMPORTMLS_DIR . $path . $nameFile;  // Asegúrate de que el directorio 'csv' existe o créalo.
+            if (!file_exists(IMPORTMLS_DIR . $path)) {
+                mkdir(IMPORTMLS_DIR . $path , 0777, true); // Crea el directorio si no existe.
+            }
+            if (ftp_get($ftp, $destination_file, $nameFile, FTP_BINARY)) {
+                echo "Archivo descargado con éxito: " . $destination_file;                
+                $response = true;
+
+                // Verifica si el archivo es un zip antes de intentar descomprimir
+                if (pathinfo($destination_file, PATHINFO_EXTENSION) === 'zip') {
+                    unzipFile($destination_file, IMPORTMLS_DIR . $path);
+                } else {
+                    echo "El archivo descargado no es un archivo comprimido.";
+                }
+
+            } else {
+                echo "Error al descargar el archivo.";
+            }
+        } else {
+            echo "Archivo no encontrado en el servidor FTP.";
+        }
+        ftp_close($ftp);
+    } else {
+        echo "Error al conectar al FTP.";
+    }
+    return $response;
 }
 
 // Descomprimir archivo 

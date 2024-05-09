@@ -19,6 +19,7 @@ define( 'IMPORTMLS_FILE', __FILE__ );
 define( 'IMPORTMLS_DIR', plugin_dir_path( IMPORTMLS_FILE ) );
 define( 'IMPORTMLS_BASENAME', plugin_basename( IMPORTMLS_FILE ) );
 // Includes 
+define( 'DIR_NAME_TEMP', plugin_basename( 'data/temp' ) );//Pasar a la clase correspondiente
 
 require IMPORTMLS_DIR . 'includes/set_mimes.php';
 require IMPORTMLS_DIR . 'includes/load_scripts.php';

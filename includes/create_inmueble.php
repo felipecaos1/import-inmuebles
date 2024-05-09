@@ -1,32 +1,31 @@
 <?php
 
 function crear_inmueble($data){
-
     // funcion para crear un array con los id de las imagenes
     $gallery_ids = get_post_galery_ids($data[31],$data[32]);
 
     // Metacampos
     $meta_datos = array(
-    'valor' => $data[2],
-    '_direccion' => $data[63].', '.$data[6].', '.$data[5],
-    'area-de-la-propiedad' => $data[14],
-    'area-construida' => $data[15],
-    'descripcion' => $data[25],
-    'estrato' => '',
-    'id'=> $data[8],
-    'tiempo-construccion' => $data[9],
-    'floor' => '',
-    'estacionamiento' => ($data[54] != 0)? $data[54].' estacionamientos':'Sin estacionamientos',
-    'habitaciones' => $data[10],
-    'banos' => $data[11],
-    'bodega' =>'',
-    'comodidades' => array(''),
-    'sector' => array(
-        $data[6] => 'true'
-    ),
-    'galeria-de-imagenes' => $gallery_ids,
-    'urbanizacion' =>($data[3] !='No aplica')? $data[3]:'',
-    'is_mls' => true
+        'valor' => $data[2],
+        '_direccion' => $data[63].', '.$data[6].', '.$data[5],
+        'area-de-la-propiedad' => $data[14],
+        'area-construida' => $data[15],
+        'descripcion' => $data[25],
+        'estrato' => '',
+        'id'=> $data[8],
+        'tiempo-construccion' => $data[9],//Calcular sobre fecha
+        'floor' => '',
+        'estacionamiento' => ($data[54] != 0)? $data[54].' estacionamientos':'Sin estacionamientos',
+        'habitaciones' => $data[10],
+        'banos' => $data[11],
+        'bodega' =>'',
+        'comodidades' => array(''),
+        'sector' => array(
+            $data[6] => 'true'
+        ),
+        'galeria-de-imagenes' => $gallery_ids,
+        'urbanizacion' =>($data[3] !='No aplica')? $data[3]:'',
+        'is_mls' => true
     );
     
     $post_data = array(
@@ -45,8 +44,8 @@ function crear_inmueble($data){
 
         //id_multimedia $data[31]
         //miltimedia count $data[32]
-        $data[31] = '0003A9CA';
-        $ruta_feature_img = IMPORTMLS_DIR . 'data/'.$data[31].'.L01';
+        // $data[31] = '0003A9CA';
+        $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data[31].'.L01';
        
         
         if ( file_exists( $ruta_feature_img ) ){
@@ -56,9 +55,9 @@ function crear_inmueble($data){
             } else {
                 echo 'Hubo un error al cargar la imagen.';
             }
-         }else{
+        }else{
             echo 'errorImagendestacada ';
-         }
+        }
          
     } else {
   
@@ -101,8 +100,6 @@ function set_ciudad($post_id, $ciudad) {
 // Devuelve un string con los ids de las imagenes cargadas 
 function get_post_galery_ids($id_unique ='', $multi_count = 1 ){
 
-    $id_unique = '0003A9CA';
-    $multi_count = 13; 
     $list_ids = [];
 
     for ($i=2; $i <= $multi_count ; $i++) {

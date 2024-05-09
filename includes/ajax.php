@@ -1,11 +1,13 @@
 <?php
 
 // Modificar la función para leer el archivo CSV y crear un número limitado de posts
-function leer_csv_ajax_handler() {
+function leer_csv_ajax_handler($file_name) 
+{
     // Verificar si el usuario actual tiene permisos para realizar la acción
     if (current_user_can('manage_options')) {
-        $file_path = IMPORTMLS_DIR . 'data/csv/res20231016.csv';
-         
+        
+        $file_path = IMPORTMLS_DIR . $file_name;
+                 
         if (file_exists($file_path)) {
             $batch_size = 2; // Número de registros por lote
             $start = isset($_POST['start']) ? intval($_POST['start']) : 0; // Obtener el punto de inicio del lote desde la solicitud AJAX

@@ -78,6 +78,9 @@ function guardar_credenciales_ftp() {
     }
 
     if(isset($_POST['import-file'])){
+        echo 'Empezando importación';
+        import_data();
+        exit;
         downloadFile('/res20231016.csv','data/csv');
     }
 }
