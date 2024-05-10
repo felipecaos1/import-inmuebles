@@ -1,29 +1,38 @@
 <?php
 
-require IMPORTMLS_DIR . 'includes/csv.php';
-require IMPORTMLS_DIR . 'includes/inmueble_import.php';
+require IMPORTMLS_DIR . 'includes/class_csv.php';
+require IMPORTMLS_DIR . 'includes/class_inmueble_import.php';
 
 class FileManager
 {
-    // conexion ftp
+    /**
+     * Establece una conexión FTP utilizando las credenciales almacenadas en las opciones del plugin.
+     *
+     * '@return resource|false Retorna un recurso de conexión FTP si la conexión se establece correctamente, o false si faltan credenciales.
+     */
     private function my_ftp_connect()
     {
+        // Obtener las credenciales FTP almacenadas en las opciones del plugin
         $ftp_server = get_option('ftp_host');
         $ftp_user = get_option('ftp_user');
         $ftp_pass = get_option('ftp_pass');
         $ftp_file = get_option('ftp_path');
 
+        // Verificar que todas las credenciales estén presentes
         if($ftp_server && $ftp_user && $ftp_pass && $ftp_file){
             $ftp = ftp_connect( $ftp_server );
             ftp_login( $ftp, $ftp_user, $ftp_pass );
-            return $ftp;
+            return $ftp; // Retornar el recurso de conexión FTP
         }else{
-            return false;
+            return false; // Retornar false si faltan credenciales
         }
     }
 
     /**
-     * Funcion para manejar la importacion de los csv res y com, y el zip photo
+     * Importa archivos de datos de inmuebles (residenciales y comerciales) y fotos de inmuebles.
+     * Los archivos se descargan, se importan a la base de datos y luego se eliminan.
+     *
+     * @param string|null $date Fecha en formato 'Ymd' de la que se importarán los archivos. Si es nulo, se usa la fecha actual.
      */
     public function import($date = null)
     {        
@@ -37,14 +46,14 @@ class FileManager
         $residentialFile = "/res{$date}.csv";
         $commercialFile = "/com{$date}.csv";
         $zip = "/photo{$date}.zip";
-
+        
         //Descargar los archivos
-        // $this->download_file($residentialFile,DIR_NAME_TEMP);
-        // $this->download_file($commercialFile,DIR_NAME_TEMP);
-        // $this->download_file($zip,DIR_NAME_TEMP);
+        $this->download_file($residentialFile,DIR_NAME_TEMP);
+        $this->download_file($commercialFile,DIR_NAME_TEMP);
+        $this->download_file($zip,DIR_NAME_TEMP);
 
         //Importar
-        // $this->import_file($zip,'zip');
+        $this->import_file($zip,'zip');
         $this->import_file($residentialFile,'csv');
         $this->import_file($commercialFile,'csv');
 
@@ -55,9 +64,15 @@ class FileManager
 
         echo json_encode([$residentialFile,$commercialFile,$zip]);
         exit;
-
     }
 
+    /**
+     * Descarga un archivo desde un servidor FTP.
+     *
+     * @param string $name_file Nombre del archivo a descargar.
+     * @param string $path Ruta local donde se almacenará el archivo descargado.
+     * @return bool True si la descarga fue exitosa, false si hubo un error.
+     */
     private function download_file($name_file, $path) 
     {
         $response = false;
@@ -73,14 +88,6 @@ class FileManager
                 if (ftp_get($ftp, $destination_file, $name_file, FTP_BINARY)) {
                     echo "Archivo descargado con éxito: " . $destination_file;                
                     $response = true;
-
-                    // Verifica si el archivo es un zip antes de intentar descomprimir
-                    // if (pathinfo($destination_file, PATHINFO_EXTENSION) === 'zip') {
-                    //     $this->unzipFile($destination_file, IMPORTMLS_DIR . $path);
-                    // } else {
-                    //     echo "El archivo descargado no es un archivo comprimido.";
-                    // }
-
                 } else {
                     echo "Error al descargar el archivo.";
                 }
@@ -94,11 +101,19 @@ class FileManager
         return $response;
     }
 
+    /**
+     * Importa un archivo CSV o descomprimir un ZIP.
+     *
+     * @param string $name_file Nombre del archivo a importar.
+     * @param string $import_type Tipo de archivo a importar ('csv' o 'zip').
+     */
     private function import_file($name_file,$import_type)
     {
         if($import_type == 'csv'){
+            // Importar archivo CSV
             Csv::import(new ImmovableImport(),DIR_NAME_TEMP.'/'.$name_file);
-        }elseif($import_type == 'zip'){            
+        }elseif($import_type == 'zip'){ 
+            // Descomprimir archivo ZIP           
             $destination_file = IMPORTMLS_DIR .DIR_NAME_TEMP . $name_file;
             if (pathinfo($destination_file, PATHINFO_EXTENSION) === 'zip') {
                 $this->unzipFile($destination_file, IMPORTMLS_DIR . DIR_NAME_TEMP);
@@ -108,7 +123,12 @@ class FileManager
         }
     }
 
-    // Descomprimir archivo 
+    /**
+     * Descomprime un archivo ZIP.
+     *
+     * @param string $filePath Ruta al archivo ZIP que se va a descomprimir.
+     * @param string $extractTo Ruta donde se extraerán los archivos del ZIP.
+     */
     private function unzipFile($filePath, $extractTo) 
     {
         $zip = new ZipArchive;
@@ -122,6 +142,11 @@ class FileManager
         }
     }
 
+    /**
+     * Elimina un archivo.
+     *
+     * @param string $name_file Nombre del archivo a eliminar.
+     */
     private function delete_file($name_file)
     {
         $file_path = IMPORTMLS_DIR .DIR_NAME_TEMP . $name_file;
@@ -132,6 +157,7 @@ class FileManager
             echo "El archivo no existe.";
         }
     }
+
     // Función para procesar el archivo CSV desde FTP
     private function mi_plugin_inmuebles_procesar_csv_desde_ftp() 
     {

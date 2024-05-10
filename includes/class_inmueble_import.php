@@ -1,6 +1,11 @@
 <?php
 class ImmovableImport
 {
+    /**
+     * Crea una nueva entrada de propiedad en WordPress utilizando los datos proporcionados.
+     *
+     * @param array $data Datos de la propiedad obtenidos del archivo CSV.
+     */
     public function crear_inmueble($data)
     {
 
@@ -181,8 +186,7 @@ class ImmovableImport
      * @return Array Retorna un array de comodidades para almacenar en la base de datos
      */
     private function get_amenities($amenities)
-    {
-        
+    {        
         // Separamos el string 
         $elementosBrutos = explode(',', $amenities);
 
@@ -193,7 +197,6 @@ class ImmovableImport
 
         // Crear un array asociativo donde cada elemento tiene el valor 'true'
         $array_resultado = array_fill_keys($elementos, 'true');
-
      
         return $array_resultado;
     }

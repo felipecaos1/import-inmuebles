@@ -1,7 +1,22 @@
 <?php
 
-//Show
-function mi_plugin_inmuebles_pagina_config() {
+require IMPORTMLS_DIR . 'includes/load_scripts.php';
+require IMPORTMLS_DIR . 'includes/create_menu.php';
+require IMPORTMLS_DIR . 'includes/set_mimes.php';
+
+require IMPORTMLS_DIR . 'includes/class_file_manager.php';
+
+function mi_plugin_importar_inmuebles()
+{
+    load_view('importar_inmuebles');
+}
+
+/**
+ * Genera la página de configuración del plugin "Import Inmuebles", cargando la vista 'credenciales_ftp'.
+ * La función obtiene las opciones de FTP almacenadas en la base de datos para pasarlas como parámetros a la vista.
+ */
+function mi_plugin_inmuebles_pagina_config() 
+{
     $params = array(
         'ftp_host' => get_option('ftp_host'),
         'ftp_user' => get_option('ftp_user'),
@@ -13,8 +28,12 @@ function mi_plugin_inmuebles_pagina_config() {
     load_view('credenciales_ftp', $params);
 }
 
-
-function guardar_credenciales_ftp() {
+/**
+ * Guarda las credenciales FTP ingresadas por el usuario en la página de configuración del plugin.
+ * También inicia el proceso de importación de archivos si se activa la opción 'import-file'.
+ */
+function guardar_credenciales_ftp() 
+{
     if (isset($_POST['guardar_credenciales'])) {
         $ftp_host = sanitize_text_field($_POST['ftp_host']);
         $ftp_user = sanitize_text_field($_POST['ftp_user']);
@@ -26,9 +45,7 @@ function guardar_credenciales_ftp() {
         update_option('ftp_pass', $ftp_pass);
         update_option('ftp_path', $ftp_path);
 
-
         echo '<div class="notice notice-success"><p>Credenciales FTP guardadas correctamente.</p></div>';
-
     }
 
     if(isset($_POST['import-file'])){

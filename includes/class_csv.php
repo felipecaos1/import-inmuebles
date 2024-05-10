@@ -3,10 +3,10 @@ class Csv
 {
     
     /**
-     * Modificar la función para leer el archivo CSV y crear un número limitado de posts
+     * Importa datos desde un archivo CSV.
      * 
-     * @param  object  $import
-     * @param  string  $file_name
+     * @param  object  $import Objeto de importación que contiene la lógica de importación específica.
+     * @param  string  $file_name Nombre del archivo CSV a importar.
      */
     public static function import($import,$file_name) 
     {
