@@ -5,7 +5,6 @@ class ImmovableImport
     {
         // funcion para crear un array con los id de las imagenes
         $gallery_ids = $this->get_post_galery_ids($data[31],$data[32]);
-
         // Metacampos
         $meta_datos = array(
             'valor' => $data[2],
@@ -15,7 +14,7 @@ class ImmovableImport
             'descripcion' => $data[25],
             'estrato' => '',
             'id'=> $data[8],
-            'tiempo-construccion' => $data[9],//Calcular sobre fecha
+            'tiempo-construccion' => $this->calculate_built_time($data[9]),//Calcular sobre fecha
             'floor' => '',
             'estacionamiento' => ($data[54] != 0)? $data[54].' estacionamientos':'Sin estacionamientos',
             'habitaciones' => $data[10],
@@ -41,13 +40,12 @@ class ImmovableImport
         $post_id = wp_insert_post($post_data);
         // Verificar si la inserción fue exitosa
         if (!is_wp_error($post_id)) {
-
             $result = $this->set_ciudad($post_id, $data[5]);
 
             $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data[31].'.L01';
             
             if ( file_exists( $ruta_feature_img ) ){
-                $imagen_id = $this->cargar_imagen_y_obtener_id($ruta_feature_img);
+                $imagen_id = $this->load_image_and_get_id($ruta_feature_img);
                 if ($imagen_id) {
                     set_post_thumbnail($post_id, $imagen_id);
                 } else {
@@ -64,6 +62,13 @@ class ImmovableImport
         
     }
 
+    /**
+     * Asigna una ciudad a un post en WordPress.
+     *
+     * @param int $post_id ID del post al que se asignará la ciudad.
+     * @param string $ciudad Nombre de la ciudad a asignar.
+     * @return true|WP_Error Retorna true si la asignación fue exitosa, o un objeto WP_Error si hubo un error.
+     */
     private function set_ciudad($post_id, $ciudad) 
     {
         if (empty($post_id) || !is_int($post_id) || empty($ciudad)) {
@@ -93,21 +98,23 @@ class ImmovableImport
     
         return true;
     }
-
-    // Recibe el id unico de multimedia
-    // Recibe el numero de imagenes
-    // Devuelve un string con los ids de las imagenes cargadas 
+    
+    /**
+     * Obtiene los IDs de las imágenes de una galería de medios.
+     *
+     * @param string $id_unique ID único de la galería.
+     * @param int $multi_count Número de imágenes en la galería.
+     * @return string Retorna un string con los IDs de las imágenes cargadas, separados por comas.
+     */
     private function get_post_galery_ids($id_unique ='', $multi_count = 1 )
     {
-
         $list_ids = [];
-
         for ($i=2; $i <= $multi_count ; $i++) {
             $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
             $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
             echo $ruta_img;
             if ( file_exists( $ruta_img ) ){
-                $imagen_id = $this->cargar_imagen_y_obtener_id($ruta_img);
+                $imagen_id = $this->load_image_and_get_id($ruta_img);
                 if ($imagen_id) {
                     $list_ids[]= $imagen_id;
                 } else {
@@ -122,11 +129,17 @@ class ImmovableImport
         return $str_ids;
     }
 
-    private function cargar_imagen_y_obtener_id($imagen_url) 
+    /**
+     * Carga una imagen desde una URL y obtiene su ID en la biblioteca de medios de WordPress.
+     *
+     * @param string $imagen_url URL de la imagen a cargar.
+     * @return int|bool Retorna el ID de la imagen cargada o false si no se pudo cargar.
+     */
+    private function load_image_and_get_id($imagen_url) 
     {
         $file_array = array(
-        'name' => wp_basename($imagen_url),
-        'tmp_name' => $imagen_url,
+            'name' => wp_basename($imagen_url),
+            'tmp_name' => $imagen_url,
         );
         
         try {
@@ -141,5 +154,20 @@ class ImmovableImport
             echo is_wp_error($imagen_id);
         }
         return $imagen_id;
+    }
+
+    /**
+     * Calcula el tiempo transcurrido desde un año de construcción dado hasta el año actual.
+     *
+     * @param int|string $year_construction Año de construcción.
+     * @return int|string Retorna el número de años transcurridos o una cadena vacía si el año de construcción es inválido
+     */
+    private function calculate_built_time($year_construction)
+    {
+        if($year_construction != '' && $year_construction != null){
+            $year_current = date('Y');
+            return $year_current - $year_construction;
+        }
+        return '';
     }
 }
