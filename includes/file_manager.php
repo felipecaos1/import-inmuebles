@@ -39,12 +39,12 @@ class FileManager
         $zip = "/photo{$date}.zip";
 
         //Descargar los archivos
-        $this->download_file($residentialFile,DIR_NAME_TEMP);
-        $this->download_file($commercialFile,DIR_NAME_TEMP);
-        $this->download_file($zip,DIR_NAME_TEMP);
+        // $this->download_file($residentialFile,DIR_NAME_TEMP);
+        // $this->download_file($commercialFile,DIR_NAME_TEMP);
+        // $this->download_file($zip,DIR_NAME_TEMP);
 
         //Importar
-        $this->import_file($zip,'zip');
+        // $this->import_file($zip,'zip');
         $this->import_file($residentialFile,'csv');
         $this->import_file($commercialFile,'csv');
 

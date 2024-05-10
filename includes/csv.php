@@ -15,7 +15,7 @@ class Csv
             $file_path = IMPORTMLS_DIR . $file_name;
                     
             if (file_exists($file_path)) {
-                $batch_size = 2; // Número de registros por lote
+                $batch_size = 8; // Número de registros por lote
                 $start = isset($_POST['start']) ? intval($_POST['start']) : 0; // Obtener el punto de inicio del lote desde la solicitud AJAX
                 $end = $start + $batch_size; // Calcular el final del lote
                 $file_handle = fopen($file_path, 'r'); // Abrir el archivo en modo lectura
@@ -27,7 +27,7 @@ class Csv
                             // Verificar que la fila tiene la cantidad esperada de elementos
                             if (count($data) == 65) {
                                 // Llamar a la función para crear el post en WordPress                            
-                                if($counter != 0){
+                                if($counter == 7){
                                     $import->crear_inmueble($data);
                                 }
                             } else {

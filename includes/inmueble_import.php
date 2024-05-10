@@ -3,6 +3,7 @@ class ImmovableImport
 {
     public function crear_inmueble($data)
     {
+
         // funcion para crear un array con los id de las imagenes
         $gallery_ids = $this->get_post_galery_ids($data[31],$data[32]);
         // Metacampos
@@ -20,7 +21,7 @@ class ImmovableImport
             'habitaciones' => $data[10],
             'banos' => $data[11],
             'bodega' =>'',
-            'comodidades' => array(''),
+            'comodidades' => $this->get_amenities($data[40].','.$data[41]),
             'sector' => array(
                 $data[6] => 'true'
             ),
@@ -40,7 +41,9 @@ class ImmovableImport
         $post_id = wp_insert_post($post_data);
         // Verificar si la inserción fue exitosa
         if (!is_wp_error($post_id)) {
-            $result = $this->set_ciudad($post_id, $data[5]);
+
+            $this->set_taxonomia($post_id, $data[5], 'ciudad');
+            $this->set_taxonomia($post_id, $data[7], 'tipo-de-propiedad');
 
             $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data[31].'.L01';
             
@@ -63,22 +66,22 @@ class ImmovableImport
     }
 
     /**
-     * Asigna una ciudad a un post en WordPress.
+     * Asigna una term a un post en WordPress.
      *
-     * @param int $post_id ID del post al que se asignará la ciudad.
-     * @param string $ciudad Nombre de la ciudad a asignar.
+     * @param int $post_id ID del post al que se asignará la term.
+     * @param string $term Nombre de la term a asignar.
      * @return true|WP_Error Retorna true si la asignación fue exitosa, o un objeto WP_Error si hubo un error.
      */
-    private function set_ciudad($post_id, $ciudad) 
+    private function set_taxonomia($post_id, $target, $tax ) 
     {
-        if (empty($post_id) || !is_int($post_id) || empty($ciudad)) {
+        if (empty($post_id) || !is_int($post_id) || empty($target)) {
             return new WP_Error('invalid_input', 'Input values are invalid.');
         }
-        $term = term_exists($ciudad, 'ciudad');
+        $term = term_exists($target, $tax);
         
         // Si el término no existe, créalo
         if (!$term) {
-            $term = wp_insert_term($ciudad, 'ciudad');
+            $term = wp_insert_term($target, $tax);
             // Verificar si hubo un error al crear el término
             if (is_wp_error($term)) {
                 return $term;
@@ -91,7 +94,7 @@ class ImmovableImport
         $term_id = (int) $term_id;
         
         // Asigna el término al post utilizando el ID
-        $result = wp_set_object_terms($post_id, $term_id , 'ciudad', false);
+        $result = wp_set_object_terms($post_id, $term_id , $tax, false);
         if (is_wp_error($result)) {
             return $result; // Retornar el error para manejo externo
         }
@@ -164,10 +167,35 @@ class ImmovableImport
      */
     private function calculate_built_time($year_construction)
     {
-        if($year_construction != '' && $year_construction != null){
+        if($year_construction != '' && $year_construction != null && strlen($year_construction) == 4 ){
             $year_current = date('Y');
             return $year_current - $year_construction;
         }
         return '';
     }
+
+    /**
+     * Convierte una cadena de string en un arreglo de como
+     *
+     * @param string $amenities listado de comodidades.
+     * @return Array Retorna un array de comodidades para almacenar en la base de datos
+     */
+    private function get_amenities($amenities)
+    {
+        
+        // Separamos el string 
+        $elementosBrutos = explode(',', $amenities);
+
+        // Limpiar los elementos: eliminar espacios en blanco y filtrar elementos vacíos
+        $elementos = array_filter(array_map('trim', $elementosBrutos), function($item) {
+            return $item !== '';
+        });
+
+        // Crear un array asociativo donde cada elemento tiene el valor 'true'
+        $array_resultado = array_fill_keys($elementos, 'true');
+
+     
+        return $array_resultado;
+    }
+
 }

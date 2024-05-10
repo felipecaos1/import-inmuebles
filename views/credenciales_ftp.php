@@ -1,4 +1,4 @@
-<div class="wrap">
+<div class="wrap noti-none">
     <h1>Credenciales FTP</h1>
     <form method="post" action="">
         <table class="form-table">
