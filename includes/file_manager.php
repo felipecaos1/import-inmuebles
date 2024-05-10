@@ -44,9 +44,9 @@ class FileManager
         $this->download_file($zip,DIR_NAME_TEMP);
 
         //Importar
+        $this->import_file($zip,'zip');
         $this->import_file($residentialFile,'csv');
         $this->import_file($commercialFile,'csv');
-        $this->import_file($zip,'zip');
 
         //Eliminar
         $this->delete_file($residentialFile);
