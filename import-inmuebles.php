@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'IMPORTMLS_FILE', __FILE__ );
 define( 'IMPORTMLS_DIR', plugin_dir_path( IMPORTMLS_FILE ) );
 define( 'IMPORTMLS_BASENAME', plugin_basename( IMPORTMLS_FILE ) );
+define( 'LOG_FILE', 'log.txt');
 // Define la ruta del directorio de archivos temporales del plugin
 define( 'DIR_NAME_TEMP', plugin_basename( 'data/temp' ) );
 
@@ -25,3 +26,13 @@ define( 'DIR_NAME_TEMP', plugin_basename( 'data/temp' ) );
  * Incluye el archivo que contiene las funciones principales o iniciales del pugin
  */
 require IMPORTMLS_DIR . 'includes/plugin_init.php';
+
+
+// Ruta al archivo de logs
+$log_file = IMPORTMLS_DIR . LOG_FILE;
+
+// Verificar si el archivo de logs existe, sino crearlo
+if (!file_exists($log_file)) {
+    $log = fopen($log_file, 'w');
+    fclose($log);
+}

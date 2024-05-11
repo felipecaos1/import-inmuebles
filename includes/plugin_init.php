@@ -49,7 +49,6 @@ function guardar_credenciales_ftp()
     }
 
     if(isset($_POST['import-file'])){
-        echo 'Empezando importación <br>';
         $import_files = new FileManager();
         $import_files->import();
         exit;

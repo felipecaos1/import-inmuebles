@@ -36,6 +36,7 @@ class FileManager
      */
     public function import($date = null)
     {        
+        file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Inicia la importación' . PHP_EOL, FILE_APPEND);
         date_default_timezone_set('America/Bogota');
         set_time_limit(600);
 
@@ -58,12 +59,12 @@ class FileManager
         $this->import_file($commercialFile,'csv');
 
         //Eliminar
-        $this->delete_file($residentialFile);
-        $this->delete_file($commercialFile);
-        $this->delete_file($zip);
+        // $this->delete_file($residentialFile);
+        // $this->delete_file($commercialFile);
+        // $this->delete_file($zip);
 
-        echo json_encode([$residentialFile,$commercialFile,$zip]);
-        exit;
+        // echo json_encode([$residentialFile,$commercialFile,$zip]);
+        // exit;
     }
 
     /**
@@ -78,6 +79,7 @@ class FileManager
         $response = false;
         $ftp = $this->my_ftp_connect();
         if ($ftp) {
+            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Conecatdo al servidor FTP' . PHP_EOL, FILE_APPEND);
             // Verifica si el archivo existe en el servidor FTP
             $files = ftp_nlist($ftp, '/');
             if (in_array($name_file, $files)) {
@@ -86,17 +88,17 @@ class FileManager
                     mkdir(IMPORTMLS_DIR . $path , 0777, true); // Crea el directorio si no existe.
                 }
                 if (ftp_get($ftp, $destination_file, $name_file, FTP_BINARY)) {
-                    echo "Archivo descargado con éxito: " . $destination_file;                
+                    file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Archivo descargado con éxito: ' . $destination_file . PHP_EOL, FILE_APPEND);          
                     $response = true;
                 } else {
-                    echo "Error al descargar el archivo.";
+                    file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Error al descargar el archivo: ' . $name_file . PHP_EOL, FILE_APPEND);
                 }
             } else {
-                echo "Archivo no encontrado en el servidor FTP.";
+                file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Archivo no encontrado en el servidor FTP: ' . $name_file . PHP_EOL, FILE_APPEND);
             }
             ftp_close($ftp);
         } else {
-            echo "Error al conectar al FTP.";
+            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Error al conectar al FTP. ' . PHP_EOL, FILE_APPEND);
         }
         return $response;
     }
@@ -109,6 +111,7 @@ class FileManager
      */
     private function import_file($name_file,$import_type)
     {
+
         if($import_type == 'csv'){
             // Importar archivo CSV
             Csv::import(new ImmovableImport(),DIR_NAME_TEMP.'/'.$name_file);
@@ -136,9 +139,9 @@ class FileManager
         if ($res === TRUE) {
             $zip->extractTo($extractTo);
             $zip->close();
-            echo "Archivo descomprimido con éxito.";
+            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Archivo descomprimido con éxito: ' . $filePath . PHP_EOL, FILE_APPEND);
         } else {
-            echo "Error al descomprimir el archivo.";
+            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Error al descomprimir el archivo: ' . $filePath . PHP_EOL, FILE_APPEND);
         }
     }
 
@@ -152,9 +155,9 @@ class FileManager
         $file_path = IMPORTMLS_DIR .DIR_NAME_TEMP . $name_file;
         if (file_exists($file_path)) {
             unlink($file_path);
-            echo "Archivo eliminado con éxito.";
+            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Archivo eliminado con éxito: ' . $name_file . PHP_EOL, FILE_APPEND);
         } else {
-            echo "El archivo no existe.";
+            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'El archivo '.$name_file.'no existe. '. PHP_EOL, FILE_APPEND);
         }
     }
 

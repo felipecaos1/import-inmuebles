@@ -10,30 +10,31 @@ class Csv
      */
     public static function import($import,$file_name) 
     {
+
         // Verificar si el usuario actual tiene permisos para realizar la acción
         if (current_user_can('manage_options')) {            
             $file_path = IMPORTMLS_DIR . $file_name;
                     
             if (file_exists($file_path)) {
-                $batch_size = 8; // Número de registros por lote
+
+                $batch_size = 4; // Número de registros por lote
                 $start = isset($_POST['start']) ? intval($_POST['start']) : 0; // Obtener el punto de inicio del lote desde la solicitud AJAX
                 $end = $start + $batch_size; // Calcular el final del lote
                 $file_handle = fopen($file_path, 'r'); // Abrir el archivo en modo lectura
                 if ($file_handle !== false) {
+                    file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Inicio la lectura del archivo: ' . $file_path . PHP_EOL, FILE_APPEND);
+
                     $csv_data = array();
                     $counter = 0;
                     while (($data = fgetcsv($file_handle)) !== false) {
+                        file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Fila: '. $counter . PHP_EOL, FILE_APPEND);
                         if ($counter >= $start && $counter < $end) {
-                            // Verificar que la fila tiene la cantidad esperada de elementos
-                            if (count($data) == 65) {
-                                // Llamar a la función para crear el post en WordPress                            
-                                if($counter == 7){
-                                    $import->crear_inmueble($data);
-                                }
-                            } else {
-                                // echo 'no';
-                                // Opcionalmente, puedes manejar filas con la cantidad incorrecta de elementos aquí
+                            // Llamar a la función para crear el post en WordPress                            
+                            if($counter == 3){
+                                // get_post()
+                                $import->crear_inmueble($data);
                             }
+                          
                         }
                         $counter++;
                         if ($counter >= $end) {
@@ -41,17 +42,18 @@ class Csv
                         }
                     }
                     fclose($file_handle);
-                    wp_send_json_success(array(
-                        'message' => 'Se han creado 10 posts desde el CSV.',
-                    )); // Enviar la respuesta JSON
+                    file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Ha terminado la importación' . PHP_EOL, FILE_APPEND);
+                    // wp_send_json_success(array(
+                    //     'message' => 'Se han creado 10 posts desde el CSV.',
+                    // )); // Enviar la respuesta JSON
                 } else {
-                    wp_send_json_error('Error al abrir el archivo CSV.');
+                    file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Error al abrir el archivo CSV.' . PHP_EOL, FILE_APPEND);
                 }
             } else {
-                wp_send_json_error('Archivo CSV no encontrado.');
+                file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Archivo CSV no encontrado.' . PHP_EOL, FILE_APPEND);
             }
         } else {
-            wp_send_json_error('Acceso denegado.');
+            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Acceso denegado.' . PHP_EOL, FILE_APPEND);
         }
     }
 }
