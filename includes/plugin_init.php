@@ -68,5 +68,22 @@ function load_view($view,$params = null)
     require IMPORTMLS_DIR . 'views/'.$view.'.php';
 }
 
+/**
+ * Muestra los datos proporcionados en formato JSON de forma legible y termina la ejecución del script.
+ *
+ * @param mixed $var El dato o la variable a mostrar en formato JSON.
+ * @return array Vacío ya que la ejecución se detiene después de mostrar el JSON.
+ */
+function dump_json(...$vars): void 
+{
+    $data = [];
+    foreach ($vars as $var) {
+        $data[] = $var;
+    }
+
+    echo "<pre>" . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "</pre>";
+    exit;
+}
+
 add_action('admin_init', 'guardar_credenciales_ftp');
 

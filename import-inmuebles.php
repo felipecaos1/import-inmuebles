@@ -26,13 +26,3 @@ define( 'DIR_NAME_TEMP', plugin_basename( 'data/temp' ) );
  * Incluye el archivo que contiene las funciones principales o iniciales del pugin
  */
 require IMPORTMLS_DIR . 'includes/plugin_init.php';
-
-
-// Ruta al archivo de logs
-$log_file = IMPORTMLS_DIR . LOG_FILE;
-
-// Verificar si el archivo de logs existe, sino crearlo
-if (!file_exists($log_file)) {
-    $log = fopen($log_file, 'w');
-    fclose($log);
-}

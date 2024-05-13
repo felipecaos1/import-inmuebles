@@ -1,6 +1,7 @@
 <?php
 class Csv
 {
+    private static $header;
     
     /**
      * Importa datos desde un archivo CSV.
@@ -10,7 +11,6 @@ class Csv
      */
     public static function import($import,$file_name) 
     {
-
         // Verificar si el usuario actual tiene permisos para realizar la acción
         if (current_user_can('manage_options')) {            
             $file_path = IMPORTMLS_DIR . $file_name;
@@ -22,19 +22,23 @@ class Csv
                 $end = $start + $batch_size; // Calcular el final del lote
                 $file_handle = fopen($file_path, 'r'); // Abrir el archivo en modo lectura
                 if ($file_handle !== false) {
-                    file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Inicio la lectura del archivo: ' . $file_path . PHP_EOL, FILE_APPEND);
-
-                    $csv_data = array();
+                    Log::info('Inicio la lectura del archivo: ' . $file_name);
+                    $csv_data = array();    
                     $counter = 0;
+
                     while (($data = fgetcsv($file_handle)) !== false) {
-                        file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Fila: '. $counter . PHP_EOL, FILE_APPEND);
+                        if($counter == 0){
+                            self::$header = $data;
+                        }
                         if ($counter >= $start && $counter < $end) {
+                            // Log::info('Fila: '. $counter); 
                             // Llamar a la función para crear el post en WordPress                            
                             if($counter == 3){
                                 // get_post()
-                                $import->crear_inmueble($data);
-                            }
-                          
+                                $import->crear_inmueble(
+                                    self::column_mapping_heading_row($data)
+                                );
+                            }                          
                         }
                         $counter++;
                         if ($counter >= $end) {
@@ -42,19 +46,47 @@ class Csv
                         }
                     }
                     fclose($file_handle);
-                    file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Ha terminado la importación' . PHP_EOL, FILE_APPEND);
+                    Log::info('Ha terminado la importación',['Post creados' => 10]);
                     // wp_send_json_success(array(
                     //     'message' => 'Se han creado 10 posts desde el CSV.',
                     // )); // Enviar la respuesta JSON
                 } else {
-                    file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Error al abrir el archivo CSV.' . PHP_EOL, FILE_APPEND);
+                    Log::error('Error al abrir el archivo CSV.');
                 }
             } else {
-                file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Archivo CSV no encontrado.' . PHP_EOL, FILE_APPEND);
+                Log::info('Archivo CSV no encontrado.');
             }
         } else {
-            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Acceso denegado.' . PHP_EOL, FILE_APPEND);
+            Log::error('Acceso denegado.');
         }
+    }
+
+    /**
+     * Mapea y limpia los nombres de las columnas del CSV para asignar claves en un array.
+     *
+     * @param array $row La fila del CSV con los datos.
+     * @return array El array mapeado con los nombres de las columnas limpios como claves.
+     */
+    private static function column_mapping_heading_row($row) : array 
+    {
+        $return_row = [];
+        for ($i=1; $i <= count(self::$header); $i++) { 
+            $clean_name = self::clean_column_name(self::$header[$i-1]);
+            $return_row[$clean_name] = $row[$i-1];
+        }
+        return $return_row;
+    }
+
+    /**
+     * Limpia el nombre de una columna del CSV eliminando el BOM y las comillas.
+     *
+     * @param string $name El nombre de la columna a limpiar.
+     * @return string El nombre de la columna limpio.
+     */
+    private static function clean_column_name($name) : string 
+    {
+        // Elimina el BOM y las comillas del nombre de la columna
+        return trim(str_replace(["\xef\xbb\xbf", '"'], '', $name));
     }
 }
 // Agregar acción para la solicitud AJAX

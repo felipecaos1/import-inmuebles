@@ -1,7 +1,9 @@
 <?php
 
+require IMPORTMLS_DIR . 'includes/class_log.php';
 require IMPORTMLS_DIR . 'includes/class_csv.php';
-require IMPORTMLS_DIR . 'includes/class_inmueble_import.php';
+require IMPORTMLS_DIR . 'imports/class_residential_import.php';
+require IMPORTMLS_DIR . 'imports/class_commercial_import.php';
 
 class FileManager
 {
@@ -29,6 +31,46 @@ class FileManager
     }
 
     /**
+     * Inicia la importación masiva de archivos ZIP desde el servidor FTP y procesa cada archivo.
+     *
+     * @param int $cant Cantidad de archivos a procesar en cada lote.
+     * @return string Retorna un mensaje JSON con información sobre la importación.
+     */
+    public function load_all_zip($cant = 1)
+    {
+        set_time_limit(600);
+    
+        try {
+            Log::info("Iniciando la importación de los archivos ZIP");
+            
+            $ftp = $this->my_ftp_connect();
+            $archivos = ftp_nlist($ftp, '/');
+
+            $archivosZip = array_filter($archivos, function ($archivo) {
+                return pathinfo($archivo, PATHINFO_EXTENSION) == 'zip' && strpos($archivo, 'photo_ofc') === false;
+            });
+    
+            $inicio = ($cant - 1) * 30; // Calcular el índice de inicio basado en la cantidad y el tamaño del lote
+            $fin = $cant * 30; // Calcular el índice de fin
+    
+            $archivosParaProcesar = array_slice($archivosZip, $inicio, 30); // Obtener el lote de archivos a procesar
+    
+            foreach ($archivosParaProcesar as $key => $archivoZip) {
+                $this->download_file($archivoZip,DIR_NAME_TEMP);
+                $this->import_file($archivoZip, 'zip');
+                $this->delete_file($archivoZip);
+            }
+    
+            Log::info("La importación de los archivos ZIP fue exitosa");
+            Log::info("Total archivos = " . count($archivosZip) . " : numero peticion url = " . $cant);
+            return json_encode(['message' => 'La importación de los archivos ZIP fue exitosa', 'Total zips' =>$archivosZip]);
+    
+        } catch (\Exception $e) {
+            Log::error("Error durante la importación de los archivos ZIP: " . $e->getMessage());
+        }
+    }
+
+    /**
      * Importa archivos de datos de inmuebles (residenciales y comerciales) y fotos de inmuebles.
      * Los archivos se descargan, se importan a la base de datos y luego se eliminan.
      *
@@ -36,10 +78,10 @@ class FileManager
      */
     public function import($date = null)
     {        
-        file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Inicia la importación' . PHP_EOL, FILE_APPEND);
         date_default_timezone_set('America/Bogota');
         set_time_limit(600);
-
+        
+        Log::info('Inicia la importación');
         if($date == null){
             $date = date('Ymd');
         }
@@ -48,23 +90,20 @@ class FileManager
         $commercialFile = "/com{$date}.csv";
         $zip = "/photo{$date}.zip";
         
-        //Descargar los archivos
-        $this->download_file($residentialFile,DIR_NAME_TEMP);
-        $this->download_file($commercialFile,DIR_NAME_TEMP);
+        //Procesar zip
         $this->download_file($zip,DIR_NAME_TEMP);
-
-        //Importar
         $this->import_file($zip,'zip');
-        $this->import_file($residentialFile,'csv');
-        $this->import_file($commercialFile,'csv');
+        $this->delete_file($zip);
 
-        //Eliminar
-        // $this->delete_file($residentialFile);
-        // $this->delete_file($commercialFile);
-        // $this->delete_file($zip);
-
-        // echo json_encode([$residentialFile,$commercialFile,$zip]);
-        // exit;
+        //Procesar Residencial
+        $this->download_file($residentialFile,DIR_NAME_TEMP);
+        $this->import_file($residentialFile,'residential');
+        $this->delete_file($residentialFile);
+        
+        //Procesar Comercial
+        $this->download_file($commercialFile,DIR_NAME_TEMP);
+        $this->import_file($commercialFile,'commercial');
+        $this->delete_file($commercialFile);
     }
 
     /**
@@ -79,7 +118,7 @@ class FileManager
         $response = false;
         $ftp = $this->my_ftp_connect();
         if ($ftp) {
-            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Conecatdo al servidor FTP' . PHP_EOL, FILE_APPEND);
+            Log::info('Conectado al servidor FTP');
             // Verifica si el archivo existe en el servidor FTP
             $files = ftp_nlist($ftp, '/');
             if (in_array($name_file, $files)) {
@@ -87,18 +126,18 @@ class FileManager
                 if (!file_exists(IMPORTMLS_DIR . $path)) {
                     mkdir(IMPORTMLS_DIR . $path , 0777, true); // Crea el directorio si no existe.
                 }
-                if (ftp_get($ftp, $destination_file, $name_file, FTP_BINARY)) {
-                    file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Archivo descargado con éxito: ' . $destination_file . PHP_EOL, FILE_APPEND);          
+                if (ftp_get($ftp, $destination_file, $name_file, FTP_BINARY)) {          
+                    Log::info('Archivo descargado con éxito: ' . $destination_file);
                     $response = true;
                 } else {
-                    file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Error al descargar el archivo: ' . $name_file . PHP_EOL, FILE_APPEND);
+                    Log::info('Error al descargar el archivo: ' . $name_file);
                 }
             } else {
-                file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Archivo no encontrado en el servidor FTP: ' . $name_file . PHP_EOL, FILE_APPEND);
+                Log::info('Archivo no encontrado en el servidor FTP: ' . $name_file);
             }
             ftp_close($ftp);
         } else {
-            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Error al conectar al FTP. ' . PHP_EOL, FILE_APPEND);
+            Log::error('Error al conectar al FTP.');
         }
         return $response;
     }
@@ -111,10 +150,11 @@ class FileManager
      */
     private function import_file($name_file,$import_type)
     {
-
-        if($import_type == 'csv'){
+        if($import_type == 'residential'){
             // Importar archivo CSV
-            Csv::import(new ImmovableImport(),DIR_NAME_TEMP.'/'.$name_file);
+            Csv::import(new ResidentialImport(),DIR_NAME_TEMP.'/'.$name_file);
+        }elseif($import_type == 'commercial'){ 
+            Csv::import(new CommercialImport(),DIR_NAME_TEMP.'/'.$name_file);
         }elseif($import_type == 'zip'){ 
             // Descomprimir archivo ZIP           
             $destination_file = IMPORTMLS_DIR .DIR_NAME_TEMP . $name_file;
@@ -139,9 +179,9 @@ class FileManager
         if ($res === TRUE) {
             $zip->extractTo($extractTo);
             $zip->close();
-            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Archivo descomprimido con éxito: ' . $filePath . PHP_EOL, FILE_APPEND);
+            Log::info('Archivo descomprimido con éxito: ' . $filePath);
         } else {
-            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Error al descomprimir el archivo: ' . $filePath . PHP_EOL, FILE_APPEND);
+            Log::error('Error al descomprimir el archivo: ' . $filePath);
         }
     }
 
@@ -153,11 +193,12 @@ class FileManager
     private function delete_file($name_file)
     {
         $file_path = IMPORTMLS_DIR .DIR_NAME_TEMP . $name_file;
+
         if (file_exists($file_path)) {
             unlink($file_path);
-            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'Archivo eliminado con éxito: ' . $name_file . PHP_EOL, FILE_APPEND);
+            Log::info('Archivo eliminado con éxito: ' . $name_file);
         } else {
-            file_put_contents(IMPORTMLS_DIR.LOG_FILE, date('H:i:s') . 'El archivo '.$name_file.'no existe. '. PHP_EOL, FILE_APPEND);
+            Log::error('El archivo '.$name_file.'no existe.');
         }
     }
 
