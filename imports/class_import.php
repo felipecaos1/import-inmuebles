@@ -1,6 +1,67 @@
 <?php
 class Import
 {
+    /**
+     * Establece la imagen destacada del post 
+     *
+     * @param string $ruta_feature_img | int $post_id recibe la ruta de la imagen y el id del post
+     * @return true | false 
+     */
+    public function set_feature_img($post_id , $ruta_feature_img)
+    {
+        if ( file_exists( $ruta_feature_img ) ){
+            $imagen_id = $this->load_image_and_get_id($ruta_feature_img);
+
+            if ($imagen_id) {
+                $result_thumb = set_post_thumbnail($post_id, $imagen_id);
+
+                if (!is_wp_error($result_thumb)) {
+                    Log::info('Se establecio la imagen destacada del post');
+                    return true;
+                } else {
+                    Log::info('Error estableciendo la imagen destacada del post');
+                    return false;
+                }
+
+            } else {
+                Log::error('Hubo un error al cargar la imagen: '. $ruta_feature_img);
+                return false;
+            }
+        }else{
+            Log::info('La imagen: '.$ruta_feature_img.' no existe');
+            return false;
+        } 
+    }
+    
+    /**
+     * Busca un post py devuelve el id, si lo encuentra
+     *
+     * @param int $meta_id ID del post que se buscará
+     * @return id | false Retorna id si encuentra el post o retorna false, si no lo encuentra.
+     */
+    public function buscar_inmueble_por_id($id)
+    {
+        $args = array(
+            'post_type' => 'propiedades',
+            'meta_query' => array(
+                array(
+                    'key' => 'id',
+                    'value' => $id,
+                    'compare' => '='
+                )
+            )
+        );
+
+        $query = new WP_Query($args);
+
+        if ($query->have_posts()) {
+            $query->the_post();
+            return get_the_ID();
+        } else {
+            wp_reset_postdata();
+            return false;
+        }
+    }
     
     /**
      * Asigna una term a un post en WordPress.
@@ -159,6 +220,37 @@ class Import
              case 'rural':
                  return 'Fincas';
                  break;
+             case 'oficina':
+                 return 'Oficinas';
+                 break;
+            //  case 'local comercial':
+            //      return '';
+            //      break;
+            //  case 'local comercial':
+            //      return '';
+            //      break;
+            //  case 'consultorio':
+            //      return '';
+            //      break;
+            //  case 'hotel/apart hotel':
+            //      return '';
+            //      break;
+             case 'finca productiva':
+                 return 'Fincas';
+                 break;
+             case 'bodega':
+                 return 'Bodegas';
+                 break;
+             case 'lote comercial':
+                 return 'Lotes';
+                 break;
+            //  case 'local comercial':
+            //      return '';
+            //      break;
+             
+            //  case 'parqueadero':
+            //      return '';
+            //      break;
              
              default:
                  return $property_type;

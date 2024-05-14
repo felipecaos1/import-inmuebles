@@ -98,12 +98,12 @@ class FileManager
         //Procesar Residencial
         $this->download_file($residentialFile,DIR_NAME_TEMP);
         $this->import_file($residentialFile,'residential');
-        $this->delete_file($residentialFile);
+        // $this->delete_file($residentialFile);
         
         //Procesar Comercial
         $this->download_file($commercialFile,DIR_NAME_TEMP);
         $this->import_file($commercialFile,'commercial');
-        $this->delete_file($commercialFile);
+        // $this->delete_file($commercialFile);
     }
 
     /**

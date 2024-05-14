@@ -9,3 +9,6 @@
 -Ajustar los logs
 -Carrusel de imagenes en la interna de la propiedad 
 -Descarga masiva de zips
+
+-Se actualizan las taxonomias? 
+--Limpiar taxonimias y establecer
