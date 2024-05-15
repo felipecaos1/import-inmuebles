@@ -17,9 +17,9 @@ class Csv
                     
             if (file_exists($file_path)) {
 
-                $batch_size = 4; // Número de registros por lote
-                $start = isset($_POST['start']) ? intval($_POST['start']) : 0; // Obtener el punto de inicio del lote desde la solicitud AJAX
-                $end = $start + $batch_size; // Calcular el final del lote
+                // $batch_size = 4; // Número de registros por lote
+                // $start = isset($_POST['start']) ? intval($_POST['start']) : 0; // Obtener el punto de inicio del lote desde la solicitud AJAX
+                // $end = $start + $batch_size; // Calcular el final del lote
                 $file_handle = fopen($file_path, 'r'); // Abrir el archivo en modo lectura
                 if ($file_handle !== false) {
                     Log::info('Inicio la lectura del archivo: ' . $file_name);
@@ -30,20 +30,22 @@ class Csv
                         if($counter == 0){
                             self::$header = $data;
                         }
-                        if ($counter >= $start && $counter < $end) {
+                        // if ($counter >= $start && $counter < $end) {
                             // Log::info('Fila: '. $counter); 
                             // Llamar a la función para crear el post en WordPress                            
-                            if($counter == 3){
+                            if($counter > 0){
+                                Log::info('I- '.$counter);
                                 // get_post()
                                 $import->crear_inmueble(
                                     self::column_mapping_heading_row($data)
                                 );
                             }                          
-                        }
+                        // }
                         $counter++;
-                        if ($counter >= $end) {
-                            break; // Salir del bucle después de procesar el número deseado de filas
-                        }
+                        // if ($counter >= $end) {
+                            // break; // Salir del bucle después de procesar el número deseado de filas
+                        // }
+                        sleep(1);
                     }
                     fclose($file_handle);
                     Log::info('Ha terminado la importación',['Post creados' => 10]);

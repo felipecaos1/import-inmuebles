@@ -16,19 +16,19 @@ class Import
                 $result_thumb = set_post_thumbnail($post_id, $imagen_id);
 
                 if (!is_wp_error($result_thumb)) {
-                    Log::info('Se establecio la imagen destacada del post');
+                    // Log::info('Se establecio la imagen destacada del post');
                     return true;
                 } else {
-                    Log::info('Error estableciendo la imagen destacada del post');
+                    // Log::info('Error estableciendo la imagen destacada del post');
                     return false;
                 }
 
             } else {
-                Log::error('Hubo un error al cargar la imagen: '. $ruta_feature_img);
+                // Log::error('Hubo un error al cargar la imagen: '. $ruta_feature_img);
                 return false;
             }
         }else{
-            Log::info('La imagen: '.$ruta_feature_img.' no existe');
+            // Log::info('La imagen: '.$ruta_feature_img.' no existe');
             return false;
         } 
     }
@@ -118,15 +118,15 @@ class Import
                 if ($imagen_id) {
                     $list_ids[]= $imagen_id;
                 } else {
-                    Log::error('Hubo un error al cargar la imagen en la galería.');
+                    // Log::error('Hubo un error al cargar la imagen en la galería.');
                 }
             }else{
-                Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
+                // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
             }
         }
         $str_ids = implode(',', $list_ids );
 
-        Log::info('Se creo la galería.');
+        // Log::info('Se creo la galería.');
         return $str_ids;
     }
 
@@ -226,9 +226,6 @@ class Import
             //  case 'local comercial':
             //      return '';
             //      break;
-            //  case 'local comercial':
-            //      return '';
-            //      break;
             //  case 'consultorio':
             //      return '';
             //      break;
@@ -244,10 +241,6 @@ class Import
              case 'lote comercial':
                  return 'Lotes';
                  break;
-            //  case 'local comercial':
-            //      return '';
-            //      break;
-             
             //  case 'parqueadero':
             //      return '';
             //      break;

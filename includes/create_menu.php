@@ -21,3 +21,4 @@ function mi_plugin_inmuebles_menu() {
     );
 }
 add_action('admin_menu', 'mi_plugin_inmuebles_menu');
+

@@ -87,3 +87,25 @@ function dump_json(...$vars): void
 
 add_action('admin_init', 'guardar_credenciales_ftp');
 
+
+add_action('init', 'custom_plugin_process_url');
+
+function custom_plugin_process_url() {
+    if (isset($_GET['custom_action'])) {
+        $action = $_GET['custom_action'];
+        
+        // Verifica si la acción solicitada es la que deseas ejecutar
+        if ($action == 'ejecutar_funcion') {
+            // Llama a la función que deseas ejecutar
+            my_custom_function();
+            exit; // Importante para detener la ejecución de WordPress y evitar que se imprima el resto de la página
+        }
+    }
+}
+
+function my_custom_function() {
+    // Coloca aquí el código de la función que deseas ejecutar
+    // Ejemplo de código:
+    echo '¡Función ejecutada correctamente desde la URL!';
+}
+

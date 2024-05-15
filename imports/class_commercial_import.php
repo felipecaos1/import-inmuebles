@@ -11,7 +11,7 @@ class CommercialImport extends Import
      */
     public function crear_inmueble($data)
     {
-        Log::info('Validando el inmueble comercial: '. $data['id']);
+        // Log::info('Validando el inmueble comercial: '. $data['id']);
 
         $existing_post_id = $this->buscar_inmueble_por_id($data['id']);
 
@@ -61,9 +61,9 @@ class CommercialImport extends Import
             $updated = wp_update_post($post_data);
 
             if (!is_wp_error($updated)) {
-                Log::info('Inmueble Actualizado');
+                // Log::info('Inmueble Actualizado');
             } else {
-                Log::info('Error al actualizar el inmueble');
+                // Log::info('Error al actualizar el inmueble');
             }
 
         }else{
@@ -84,7 +84,7 @@ class CommercialImport extends Import
             $post_id = wp_insert_post($post_data);
 
             if (!is_wp_error($post_id)) {
-                Log::info('Inmueble Creado');
+                // Log::info('Inmueble Creado');
 
                 $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
 
@@ -97,10 +97,10 @@ class CommercialImport extends Import
                     );
                     // Actualizar el post usando wp_update_post()
                     $updated = wp_update_post($post_data);
-                    Log::info('El post cambio a estado pendiente');
+                    // Log::info('El post cambio a estado pendiente');
                 }
             }else{
-                Log::info('Error al crear el inmueble');
+                // Log::info('Error al crear el inmueble');
             }
         }
 

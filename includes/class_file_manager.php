@@ -79,7 +79,7 @@ class FileManager
     public function import($date = null)
     {        
         date_default_timezone_set('America/Bogota');
-        set_time_limit(600);
+        set_time_limit(0);
         
         Log::info('Inicia la importación');
         if($date == null){
@@ -98,12 +98,12 @@ class FileManager
         //Procesar Residencial
         $this->download_file($residentialFile,DIR_NAME_TEMP);
         $this->import_file($residentialFile,'residential');
-        // $this->delete_file($residentialFile);
+        $this->delete_file($residentialFile);
         
         //Procesar Comercial
         $this->download_file($commercialFile,DIR_NAME_TEMP);
         $this->import_file($commercialFile,'commercial');
-        // $this->delete_file($commercialFile);
+        $this->delete_file($commercialFile);
     }
 
     /**
@@ -200,61 +200,6 @@ class FileManager
         } else {
             Log::error('El archivo '.$name_file.'no existe.');
         }
-    }
-
-    // Función para procesar el archivo CSV desde FTP
-    private function mi_plugin_inmuebles_procesar_csv_desde_ftp() 
-    {
-        $ftp_server = $_POST['ftp_host'];
-        $ftp_user = $_POST['ftp_user'];
-        $ftp_pass = $_POST['ftp_pass'];
-        $ftp_file = $_POST['ftp_path'];
-
-        $ftp = ftp_connect( $ftp_server );
-
-        if ( $ftp ) {
-            if ( ftp_login( $ftp, $ftp_user, $ftp_pass ) ) {
-                $files = ftp_nlist( $ftp, $ftp_file );
-                ftp_close( $ftp );
-                wp_send_json( [ 'archivos' => $files ] );
-                exit;
-            } else {
-                return false; // Error al iniciar sesión en el servidor FTP
-            }
-        } else {
-            return false; // Error al conectar al servidor FTP
-        }
-
-        // $conn_id = ftp_connect($ftp_server);
-        // if ($conn_id === false) {
-        //     // Manejar el error de conexión
-        //     return;
-        // }
-
-        // $login = ftp_login($conn_id, $ftp_user, $ftp_pass);
-        // if (!$login) {
-        //     // Manejar el error de inicio de sesión
-        //     ftp_close($conn_id);
-        //     return;
-        // }
-        // echo $login;
-        
-
-        // $temp_file = tempnam(sys_get_temp_dir(), 'csv_');
-        // if (ftp_get($conn_id, $temp_file, $ftp_file, FTP_BINARY)) {
-        //     $csv_content = file_get_contents($temp_file);
-        //     $csv_lines = explode("\n", $csv_content);
-        //     foreach ($csv_lines as $line) {
-        //         $datos = str_getcsv($line);
-        //         if (!empty($datos)) {
-        //             // Procesar cada fila y crear publicaciones de inmuebles
-        //             // Aquí debes ajustar el procesamiento según la estructura de tu CSV
-        //         }
-        //     }
-        //     unlink($temp_file);
-        // }
-
-        // ftp_close($conn_id);
     }
 
 }

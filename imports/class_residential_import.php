@@ -54,7 +54,7 @@ class ResidentialImport extends Import
             $updated = wp_update_post($post_data);
 
             if (!is_wp_error($updated)) {
-                Log::info('Inmueble Actualizado');
+                // Log::info('Inmueble Actualizado');
             } else {
                 Log::info('Error al actualizar el inmueble');
             }
@@ -74,7 +74,7 @@ class ResidentialImport extends Import
             $post_id = wp_insert_post($post_data);
 
             if (!is_wp_error($post_id)) {
-                Log::info('Inmueble Creado');
+                // Log::info('Inmueble Creado');
 
                 // Imagen destacada
                 $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
@@ -91,7 +91,7 @@ class ResidentialImport extends Import
                     );
                     // Actualizar el post usando wp_update_post()
                     $updated = wp_update_post($post_data);
-                    Log::info('El post cambio a estado pendiente');
+                    // Log::info('El post cambio a estado pendiente');
                 }
             } else {
                 Log::info('Error al crear el inmueble');
