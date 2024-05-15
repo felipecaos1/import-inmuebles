@@ -2,54 +2,56 @@
 class Csv
 {
     private static $header;
-
+    
     /**
      * Importa datos desde un archivo CSV.
      * 
      * @param  object  $import Objeto de importación que contiene la lógica de importación específica.
      * @param  string  $file_name Nombre del archivo CSV a importar.
      */
-    public static function import($import, $file_name) 
+    public static function import($import,$file_name) 
     {
         // Verificar si el usuario actual tiene permisos para realizar la acción
         if (current_user_can('manage_options')) {            
             $file_path = IMPORTMLS_DIR . $file_name;
                     
             if (file_exists($file_path)) {
+
+                // $batch_size = 4; // Número de registros por lote
+                // $start = isset($_POST['start']) ? intval($_POST['start']) : 0; // Obtener el punto de inicio del lote desde la solicitud AJAX
+                // $end = $start + $batch_size; // Calcular el final del lote
                 $file_handle = fopen($file_path, 'r'); // Abrir el archivo en modo lectura
                 if ($file_handle !== false) {
                     Log::info('Inicio la lectura del archivo: ' . $file_name);
-                    
-                    // Leer el archivo en bloques
-                    set_time_limit(0); // Asegura que el script no tenga límite de tiempo de ejecución
-                    // ini_set('memory_limit', '512M'); // Ajusta el límite de memoria
-                    
-                    $csv_data = [];
-                    $batch_size = 100; // Tamaño del lote para procesamiento por lotes
+                    $csv_data = array();    
                     $counter = 0;
 
                     while (($data = fgetcsv($file_handle)) !== false) {
-                        if ($counter == 0) {
+                        if($counter == 0){
                             self::$header = $data;
-                        } else {
-                            $csv_data[] = $data;
-
-                            // Procesar en lotes
-                            if (count($csv_data) >= $batch_size) {
-                                self::process_batch($import, $csv_data);
-                                $csv_data = []; // Reiniciar el array para el siguiente lote
-                            }
                         }
+                        // if ($counter >= $start && $counter < $end) {
+                            // Log::info('Fila: '. $counter); 
+                            // Llamar a la función para crear el post en WordPress                            
+                            if($counter > 0){
+                                Log::info('I- '.$counter);
+                                // get_post()
+                                $import->crear_inmueble(
+                                    self::column_mapping_heading_row($data)
+                                );
+                            }                          
+                        // }
                         $counter++;
+                        // if ($counter >= $end) {
+                            // break; // Salir del bucle después de procesar el número deseado de filas
+                        // }
+                        sleep(1);
                     }
-
-                    // Procesar cualquier fila restante
-                    if (!empty($csv_data)) {
-                        self::process_batch($import, $csv_data);
-                    }
-
                     fclose($file_handle);
-                    Log::info('Ha terminado la importación',['Post creados' => $counter - 1]);
+                    Log::info('Ha terminado la importación',['Post creados' => 10]);
+                    // wp_send_json_success(array(
+                    //     'message' => 'Se han creado 10 posts desde el CSV.',
+                    // )); // Enviar la respuesta JSON
                 } else {
                     Log::error('Error al abrir el archivo CSV.');
                 }
@@ -62,19 +64,6 @@ class Csv
     }
 
     /**
-     * Procesa un lote de datos CSV.
-     *
-     * @param object $import Objeto de importación que contiene la lógica de importación específica.
-     * @param array $batch Datos CSV a procesar.
-     */
-    private static function process_batch($import, $batch) 
-    {
-        foreach ($batch as $row) {
-            $import->crear_inmueble(self::column_mapping_heading_row($row));
-        }
-    }
-
-    /**
      * Mapea y limpia los nombres de las columnas del CSV para asignar claves en un array.
      *
      * @param array $row La fila del CSV con los datos.
@@ -83,9 +72,9 @@ class Csv
     private static function column_mapping_heading_row($row) : array 
     {
         $return_row = [];
-        for ($i = 1; $i <= count(self::$header); $i++) { 
-            $clean_name = self::clean_column_name(self::$header[$i - 1]);
-            $return_row[$clean_name] = $row[$i - 1];
+        for ($i=1; $i <= count(self::$header); $i++) { 
+            $clean_name = self::clean_column_name(self::$header[$i-1]);
+            $return_row[$clean_name] = $row[$i-1];
         }
         return $return_row;
     }
@@ -102,3 +91,6 @@ class Csv
         return trim(str_replace(["\xef\xbb\xbf", '"'], '', $name));
     }
 }
+// Agregar acción para la solicitud AJAX
+// add_action('wp_ajax_leer_csv_ajax', 'leer_csv_ajax_handler');
+// add_action('wp_ajax_nopriv_leer_csv_ajax', 'leer_csv_ajax_handler'); 

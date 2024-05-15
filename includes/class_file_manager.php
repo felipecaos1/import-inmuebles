@@ -38,8 +38,7 @@ class FileManager
      */
     public function load_all_zip($cant = 1)
     {
-        set_time_limit(600);
-    
+        set_time_limit(600);    
         try {
             Log::info("Iniciando la importación de los archivos ZIP");
             
@@ -198,7 +197,7 @@ class FileManager
             unlink($file_path);
             Log::info('Archivo eliminado con éxito: ' . $name_file);
         } else {
-            Log::error('El archivo '.$name_file.'no existe.');
+            Log::error('El archivo '.$name_file.' no existe.');
         }
     }
 

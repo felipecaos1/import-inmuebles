@@ -85,27 +85,28 @@ function dump_json(...$vars): void
     exit;
 }
 
-add_action('admin_init', 'guardar_credenciales_ftp');
-
-
-add_action('init', 'custom_plugin_process_url');
-
-function custom_plugin_process_url() {
-    if (isset($_GET['custom_action'])) {
-        $action = $_GET['custom_action'];
-        
-        // Verifica si la acción solicitada es la que deseas ejecutar
-        if ($action == 'ejecutar_funcion') {
-            // Llama a la función que deseas ejecutar
-            my_custom_function();
-            exit; // Importante para detener la ejecución de WordPress y evitar que se imprima el resto de la página
+/**
+ * Procesa la URL para ejecutar una función específica basada en el parámetro 'batch_zip'.
+ *
+ * Esta función verifica si el parámetro 'batch_zip' está presente en la URL. Si el parámetro existe y 
+ * su valor es un número válido, se crea una instancia de la clase FileManager y se llama al método 
+ * load_all_zip con el valor del lote. Si el lote no es válido, se muestra un mensaje de error.
+ * Url : http://alterna.test/?batch_zip=1
+ * @return void
+ */
+function custom_plugin_process_url() 
+{
+    if (isset($_GET['batch_zip'])) {
+        $batch = $_GET['batch_zip'];
+        if ($batch != '' && is_numeric($batch)) {
+            $import_files = new FileManager();
+            $import_files->load_all_zip($batch);
+            exit;
         }
+        echo '<h1 style="color:red;">Ingresa un lote valido a ejecutar</h1>';
+        exit;
     }
 }
 
-function my_custom_function() {
-    // Coloca aquí el código de la función que deseas ejecutar
-    // Ejemplo de código:
-    echo '¡Función ejecutada correctamente desde la URL!';
-}
-
+add_action('admin_init', 'guardar_credenciales_ftp');
+add_action('init', 'custom_plugin_process_url');
