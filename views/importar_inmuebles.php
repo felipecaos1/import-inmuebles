@@ -19,7 +19,7 @@
                     $class='text-bg-warning';
                     $text = 'Algo no va bien';
                     $importar= true;
-                    if(get_option('import_zip')&&get_option('import_zip')&&get_option('import_zip')){
+                    if(get_option('import_zip') && get_option('import_res') && get_option('import_com')){
                         $class='text-bg-success';
                         $text = 'Finalizada';
                         $importar = false;

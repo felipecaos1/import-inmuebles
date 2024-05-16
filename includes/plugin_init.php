@@ -13,7 +13,8 @@ function mi_plugin_importar_inmuebles()
     load_view('importar_inmuebles');
 }
 
-function current_date() {
+function current_date() 
+{
     $formato = '%A, %d de %B del %Y';
 
     $timestamp = time();
@@ -109,8 +110,7 @@ function dump_json(...$vars): void
         $data[] = $var;
     }
 
-    echo "<pre>" . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "</pre>";
-    exit;
+    wp_die("<pre>" . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "</pre>");
 }
 
 /**

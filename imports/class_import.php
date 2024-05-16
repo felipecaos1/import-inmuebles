@@ -114,6 +114,15 @@ class Import
             $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
             $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
             if ( file_exists( $ruta_img ) ){
+                if($i=2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
+                    $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
+                    $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
+                    if (is_wp_error($result)) {
+                        //Log::error('Hubo un error al convertir la imagen '.$id_unique.$ext);
+                    }else{
+                        $ruta_img = $destination_path;
+                    }
+                }
                 $imagen_id = $this->load_image_and_get_id($ruta_img);
                 if ($imagen_id) {
                     $list_ids[]= $imagen_id;
@@ -201,54 +210,90 @@ class Import
      * @return string retorne una cadena con el tipo de propiedad equivalente 
      */
 
-     protected function get_property_type($property_type)
-     {
-         $property_type = strtolower($property_type);
-         switch ($property_type) {
-             case 'apartamento':
-                 return 'Apartamentos';
-                 break;
-             case 'lote residencial':
-                 return 'Lote';
-                 break;
-             case 'casa':
-                 return 'Casas';
-                 break;
-             case 'finca recreativa':
-                 return 'Fincas';
-                 break;
-             case 'rural':
-                 return 'Fincas';
-                 break;
-             case 'oficina':
-                 return 'Oficinas';
-                 break;
-            //  case 'local comercial':
-            //      return '';
-            //      break;
-            //  case 'consultorio':
-            //      return '';
-            //      break;
-            //  case 'hotel/apart hotel':
-            //      return '';
-            //      break;
-             case 'finca productiva':
-                 return 'Fincas';
-                 break;
-             case 'bodega':
-                 return 'Bodegas';
-                 break;
-             case 'lote comercial':
-                 return 'Lotes';
-                 break;
-            //  case 'parqueadero':
-            //      return '';
-            //      break;
-             
-             default:
-                 return $property_type;
-                 break;
-         }
-     }
+    protected function get_property_type($property_type)
+    {
+        $property_type = strtolower($property_type);
+        switch ($property_type) {
+            case 'apartamento':
+                return 'Apartamentos';
+                break;
+            case 'lote residencial':
+                return 'Lote';
+                break;
+            case 'casa':
+                return 'Casas';
+                break;
+            case 'finca recreativa':
+                return 'Fincas';
+                break;
+            case 'rural':
+                return 'Fincas';
+                break;
+            case 'oficina':
+                return 'Oficinas';
+                break;
+        //  case 'local comercial':
+        //      return '';
+        //      break;
+        //  case 'consultorio':
+        //      return '';
+        //      break;
+        //  case 'hotel/apart hotel':
+        //      return '';
+        //      break;
+            case 'finca productiva':
+                return 'Fincas';
+                break;
+            case 'bodega':
+                return 'Bodegas';
+                break;
+            case 'lote comercial':
+                return 'Lotes';
+                break;
+        //  case 'parqueadero':
+        //      return '';
+        //      break;
+            
+            default:
+                return $property_type;
+                break;
+        }
+    }
+
+    /**
+     * Convierte una imagen a formato JPEG y la guarda en el destino especificado.
+     *
+     * @param string $source_path Ruta de la imagen de origen.
+     * @param string $destination_path Ruta donde se guardará la imagen convertida.
+     * @param int $quality Calidad de la imagen JPEG (opcional, por defecto es 90).
+     * @return bool Devuelve true si la conversión y el guardado son exitosos, false si hay errores.
+     */
+    private function convert_image_to_jpg($source_path, $destination_path, $quality = 90) 
+    {
+        // Obtener una instancia del editor de imágenes
+        $image_editor = wp_get_image_editor($source_path);
+    
+        // Verificar si no se obtuvo la instancia correctamente
+        if (is_wp_error($image_editor)) {
+            // return $image_editor;
+            return false;
+        }
+
+        // Realizar alguna manipulación de imagen si es necesario (opcional)
+        // $image_editor->resize(800, 600, true);
+
+        // Establecer la calidad de la imagen JPEG
+        // $image_editor->set_quality($quality);
+
+        // Guardar la imagen en el archivo de destino con la calidad especificada
+        $result = $image_editor->save($destination_path, 'image/jpeg');
+    
+        if (is_wp_error($result)) {
+            // return $result;
+            return false;
+        }
+    
+        return true;
+    }
 
 }
