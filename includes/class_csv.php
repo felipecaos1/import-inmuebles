@@ -11,8 +11,9 @@ class Csv
      */
     public static function import($import, $file_name) 
     {
+        $result = false;        
         // Verificar si el usuario actual tiene permisos para realizar la acción
-        if (current_user_can('manage_options')) {            
+        if (current_user_can('manage_options')) {    
             $file_path = IMPORTMLS_DIR . $file_name;
                     
             if (file_exists($file_path)) {
@@ -25,7 +26,7 @@ class Csv
                     // ini_set('memory_limit', '512M'); // Ajusta el límite de memoria
                     
                     $csv_data = [];
-                    $batch_size = 100; // Tamaño del lote para procesamiento por lotes
+                    $batch_size = 50; // Tamaño del lote para procesamiento por lotes
                     $counter = 0;
 
                     while (($data = fgetcsv($file_handle)) !== false) {
@@ -40,6 +41,9 @@ class Csv
                                 $csv_data = []; // Reiniciar el array para el siguiente lote
                             }
                         }
+                        if($counter == 100){
+                            break;
+                        }
                         $counter++;
                     }
 
@@ -50,6 +54,7 @@ class Csv
 
                     fclose($file_handle);
                     Log::info('Ha terminado la importación',['Post creados' => $counter - 1]);
+                    $result = true;
                 } else {
                     Log::error('Error al abrir el archivo CSV.');
                 }
@@ -59,6 +64,8 @@ class Csv
         } else {
             Log::error('Acceso denegado.');
         }
+
+        return $result;
     }
 
     /**

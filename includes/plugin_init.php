@@ -6,10 +6,34 @@ require IMPORTMLS_DIR . 'includes/set_mimes.php';
 
 require IMPORTMLS_DIR . 'includes/class_file_manager.php';
 
+date_default_timezone_set('America/Bogota');
+
 function mi_plugin_importar_inmuebles()
 {
     load_view('importar_inmuebles');
 }
+
+function current_date() {
+    $formato = '%A, %d de %B del %Y';
+
+    $timestamp = time();
+
+    $meses_espanol = array(
+        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    );
+    $dias_espanol = array(
+        'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'
+    );
+
+    $formato = str_replace('%B', $meses_espanol[date('n', $timestamp) - 1], $formato);
+    $formato = str_replace('%A', $dias_espanol[date('w', $timestamp)], $formato);
+
+    $result = strftime($formato, $timestamp);
+    setlocale(LC_TIME, 'es_ES.UTF-8');
+    return $result;
+}
+
 
 /**
  * Genera la página de configuración del plugin "Import Inmuebles", cargando la vista 'credenciales_ftp'.
@@ -48,6 +72,10 @@ function guardar_credenciales_ftp()
         echo '<div class="notice notice-success"><p>Credenciales FTP guardadas correctamente.</p></div>';
     }
 
+    setlocale(LC_TIME, 'es_ES.UTF-8');
+    setlocale(LC_TIME, 'es_ES.UTF-8');
+    setlocale(LC_TIME, 'es_ES.UTF-8');
+    setlocale(LC_TIME, 'es_ES.UTF-8');
     if(isset($_POST['import-file'])){
         $import_files = new FileManager();
         $import_files->import();

@@ -2,15 +2,16 @@
 -Validar si es creación o actualización -------
 -Buscar tipo de propiedad equivalente --------
 -Mapeo de variables para Res y Com  --------
--Cron 
--Organizar las vistas publicas (PEndiente de maquetar)
+-Organizar las vistas publicas (PEndiente de maquetar)------
 
+-Vista de estado de importacion diaria------
+-Descarga masiva de zips-----
+
+-Cron 
 -Logica para actualizar galeria
--Función masiva para desactivar/activar inmuebles mls
--Vista de estado de importacion diaria
--Ajustar los logs
 -Carrusel de imagenes en la interna de la propiedad 
--Descarga masiva de zips
+-Ajustar los logs
+-Función masiva para desactivar/activar inmuebles mls
 
 
 -PREGUNTAS REUINIÓN 

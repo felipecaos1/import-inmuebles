@@ -2,21 +2,21 @@
 
 function mi_plugin_inmuebles_menu() {
     add_menu_page(
-        'Configuración de Inmuebles',
-        'Importar Inmuebles',
+        'Inmuebles MSL',
+        'Inmuebles MLS',
         'manage_options',
-        'importar-inmuebles',
+        'inuebles-mls',
         'mi_plugin_importar_inmuebles',
         'dashicons-building',
         30
     );
      // Submenú
     add_submenu_page(
-        'importar-inmuebles', // ID del menú padre
-        'Credenciales FTP',
-        'Credenciales FTP',
+        'inuebles-mls', // ID del menú padre
+        'Configuraciones',
+        'Configuraciones',
         'manage_options',
-        'credenciales-ftp',
+        'configuraciones',
         'mi_plugin_inmuebles_pagina_config'
     );
 }

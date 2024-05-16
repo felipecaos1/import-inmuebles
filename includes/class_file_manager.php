@@ -77,7 +77,6 @@ class FileManager
      */
     public function import($date = null)
     {        
-        date_default_timezone_set('America/Bogota');
         set_time_limit(0);
         
         Log::info('Inicia la importación');
@@ -151,16 +150,29 @@ class FileManager
     {
         if($import_type == 'residential'){
             // Importar archivo CSV
-            Csv::import(new ResidentialImport(),DIR_NAME_TEMP.'/'.$name_file);
+            if(Csv::import(new ResidentialImport(),DIR_NAME_TEMP.'/'.$name_file)){
+                update_option('import_res', true);
+            }else{
+                update_option('import_res', false);
+            }
         }elseif($import_type == 'commercial'){ 
-            Csv::import(new CommercialImport(),DIR_NAME_TEMP.'/'.$name_file);
+            if(Csv::import(new CommercialImport(),DIR_NAME_TEMP.'/'.$name_file)){
+                update_option('import_com', true);
+            }else{
+                update_option('import_com', false);
+            }
         }elseif($import_type == 'zip'){ 
             // Descomprimir archivo ZIP           
             $destination_file = IMPORTMLS_DIR .DIR_NAME_TEMP . $name_file;
             if (pathinfo($destination_file, PATHINFO_EXTENSION) === 'zip') {
-                $this->unzipFile($destination_file, IMPORTMLS_DIR . DIR_NAME_TEMP);
+                if($this->unzipFile($destination_file, IMPORTMLS_DIR . DIR_NAME_TEMP)){
+                    update_option('import_zip', true);
+                }else{
+                    update_option('import_zip', false);
+                }
             } else {
                 echo "El archivo descargado no es un archivo comprimido.";
+                update_option('import_zip', false);
             }
         }
     }
@@ -179,8 +191,10 @@ class FileManager
             $zip->extractTo($extractTo);
             $zip->close();
             Log::info('Archivo descomprimido con éxito: ' . $filePath);
+            return true;
         } else {
             Log::error('Error al descomprimir el archivo: ' . $filePath);
+            return false;
         }
     }
 

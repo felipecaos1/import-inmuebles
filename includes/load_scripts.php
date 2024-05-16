@@ -6,5 +6,7 @@ function wptuts_scripts_basic() {
     wp_enqueue_script('custom-script');
     wp_register_style('custom-style', plugins_url('css/custom-style.css', IMPORTMLS_FILE), array(), '20120208', 'all');
     wp_enqueue_style('custom-style');
+    wp_register_style('bootstrap', plugins_url('css/bootstrap.min.css', IMPORTMLS_FILE), array(), '5.3.3', 'all');
+    wp_enqueue_style('bootstrap');
 }
 add_action('admin_enqueue_scripts', 'wptuts_scripts_basic');
