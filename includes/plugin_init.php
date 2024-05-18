@@ -120,6 +120,7 @@ function dump_json(...$vars): void
  * su valor es un número válido, se crea una instancia de la clase FileManager y se llama al método 
  * load_all_zip con el valor del lote. Si el lote no es válido, se muestra un mensaje de error.
  * Url : http://alterna.test/?batch_zip=1
+ * Url : http://alterna.test/?import=true
  * @return void
  */
 function custom_plugin_process_url() 
@@ -134,7 +135,66 @@ function custom_plugin_process_url()
         echo '<h1 style="color:red;">Ingresa un lote valido a ejecutar</h1>';
         exit;
     }
+    if (isset($_GET['import'])) {
+        if ($_GET['import']) {
+            $import_files = new FileManager();
+            $import_files->import();
+            exit;
+        }
+        echo '<h1 style="color:red;">Ingresa un lote valido a ejecutar</h1>';
+        exit;
+    }
+
+
 }
 
 add_action('admin_init', 'guardar_credenciales_ftp');
 add_action('init', 'custom_plugin_process_url');
+
+
+// Función que se ejecutará al activar el plugin
+function import_inmuebles_activate() {
+    // Log::info("Activando");
+    if(!get_option('id_preview')){
+        $url_preview = IMPORTMLS_DIR .'img/preview.jpg';
+        if(file_exists($url_preview)){
+            $img_id = load_image_and_get_id_custome($url_preview);
+            if($img_id){
+                update_option('id_preview', $img_id );
+            }
+        }
+    }    
+}
+
+// Registrar la función de activación
+register_activation_hook(IMPORTMLS_FILE, 'import_inmuebles_activate');
+
+
+function load_image_and_get_id_custome($imagen_url) 
+{
+    $file_array = array(
+        'name' => wp_basename($imagen_url),
+        'tmp_name' => $imagen_url,
+    );
+
+    // Incluir los archivos necesarios
+    if (!function_exists('media_handle_sideload')) {
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        require_once(ABSPATH . 'wp-admin/includes/media.php');
+        require_once(ABSPATH . 'wp-admin/includes/image.php');
+    }
+    
+    // dump_json($file_array, $imagen_url );
+    $imagen_id = media_handle_sideload($file_array);
+    // try {
+    // } catch (\Throwable $th) {
+    //     echo 'error side load';
+    // }
+
+    if (is_wp_error($imagen_id)) {
+        return false;
+    }else{
+        echo is_wp_error($imagen_id);
+    }
+    return $imagen_id;
+}

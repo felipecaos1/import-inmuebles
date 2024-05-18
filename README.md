@@ -7,7 +7,7 @@
 -Vista de estado de importacion diaria------
 -Descarga masiva de zips-----
 
--Cron 
+-Cron ----
 -Logica para actualizar galeria
 -Carrusel de imagenes en la interna de la propiedad 
 -Ajustar los logs

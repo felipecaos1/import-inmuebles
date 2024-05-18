@@ -13,7 +13,7 @@ class Csv
     {
         $result = false;        
         // Verificar si el usuario actual tiene permisos para realizar la acción
-        if (current_user_can('manage_options')) {    
+        // if (current_user_can('manage_options')) {    
             $file_path = IMPORTMLS_DIR . $file_name;
                     
             if (file_exists($file_path)) {
@@ -26,7 +26,7 @@ class Csv
                     // ini_set('memory_limit', '512M'); // Ajusta el límite de memoria
                     
                     $csv_data = [];
-                    $batch_size = 50; // Tamaño del lote para procesamiento por lotes
+                    $batch_size = 30; // Tamaño del lote para procesamiento por lotes
                     $counter = 0;
 
                     while (($data = fgetcsv($file_handle)) !== false) {
@@ -41,7 +41,7 @@ class Csv
                                 $csv_data = []; // Reiniciar el array para el siguiente lote
                             }
                         }
-                        if($counter == 100){
+                        if($counter == 30){
                             break;
                         }
                         $counter++;
@@ -61,9 +61,9 @@ class Csv
             } else {
                 Log::info('Archivo CSV no encontrado.');
             }
-        } else {
-            Log::error('Acceso denegado.');
-        }
+        // } else {
+        //     Log::error('Acceso denegado.');
+        // }
 
         return $result;
     }
@@ -94,6 +94,7 @@ class Csv
             $clean_name = self::clean_column_name(self::$header[$i - 1]);
             $return_row[$clean_name] = $row[$i - 1];
         }
+        // dump_json($row,$return_row);
         return $return_row;
     }
 

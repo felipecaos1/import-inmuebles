@@ -14,6 +14,9 @@ class ResidentialImport extends Import
         Log::info('Validando el inmueble residencial: '. $data['id']);
 
         $existing_post_id = $this->buscar_inmueble_por_id($data['id']);
+
+        $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
+        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count']);
         
         // Metacampos
         $meta_datos = array(
@@ -42,10 +45,22 @@ class ResidentialImport extends Import
         if ($existing_post_id) {
             // Actualiza el post existente
             $post_id = $existing_post_id;
+            $this->set_feature_img($post_id, $ruta_feature_img);
 
+            if($gallery_ids != '' ){
+                $new_gallery='';
+                $old_gallery = get_post_meta($post_id, 'galeria-de-imagenes', true);
+                if($old_gallery != '' ){
+                    $new_gallery .= $old_gallery.',';
+                }
+                $new_gallery .= $gallery_ids;
+
+                $meta_datos['galeria-de-imagenes'] =  $new_gallery;
+            }
+            
             $post_data = array(
                 'ID'            => $post_id,
-                'post_title'    => $data['id'].' - '.$data['property_type'].' en '.$data['map_area'].' - '.$data['district'],
+                'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
                 // 'post_status'   => 'publish', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
@@ -60,12 +75,11 @@ class ResidentialImport extends Import
             }
 
         } else {
-            $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count']);
-
+            
             $meta_datos['galeria-de-imagenes'] =  $gallery_ids;
 
             $post_data = array(
-                'post_title'    => $data['id'].' - '.$data['property_type'].' en '.$data['map_area'].' - '.$data['district'],
+                'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
                 'post_status'   => 'publish', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
@@ -77,21 +91,16 @@ class ResidentialImport extends Import
                 // Log::info('Inmueble Creado');
 
                 // Imagen destacada
-                $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
 
                 $result_feature_img = $this->set_feature_img($post_id, $ruta_feature_img);
 
                 // Validar si se establecio la imagen destacada o no para poner 
                 // el post en borrador
-
                 if (!$result_feature_img) {
-                    $post_data = array(
-                        'ID' => $post_id, // ID del post que quieres actualizar
-                        'post_status' => 'pending', // Estado deseado: borrador
-                    );
-                    // Actualizar el post usando wp_update_post()
-                    $updated = wp_update_post($post_data);
-                    // Log::info('El post cambio a estado pendiente');
+                    if(get_option('id_preview')){
+                        $imagen_id = get_option('id_preview');
+                        $result_thumb = set_post_thumbnail($post_id, $imagen_id);
+                    }
                 }
             } else {
                 Log::info('Error al crear el inmueble');

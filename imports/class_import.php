@@ -12,6 +12,7 @@ class Import
         if ( file_exists( $ruta_feature_img ) ){
             $imagen_id = $this->load_image_and_get_id($ruta_feature_img);
 
+
             if ($imagen_id) {
                 $result_thumb = set_post_thumbnail($post_id, $imagen_id);
 
@@ -109,16 +110,18 @@ class Import
      */
     protected function get_post_galery_ids($id_unique ='', $multi_count = 1 )
     {
+        // Log::error('Entro en galeria'. $multi_count);
+        
         $list_ids = [];
         for ($i=2; $i <= $multi_count ; $i++) {
             $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
             $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
             if ( file_exists( $ruta_img ) ){
-                if($i=2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
+                if($i==2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
                     $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
                     $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
                     if (is_wp_error($result)) {
-                        //Log::error('Hubo un error al convertir la imagen '.$id_unique.$ext);
+                        Log::error('Hubo un error al convertir la imagen '.$id_unique.$ext);
                     }else{
                         $ruta_img = $destination_path;
                     }
@@ -127,7 +130,7 @@ class Import
                 if ($imagen_id) {
                     $list_ids[]= $imagen_id;
                 } else {
-                    // Log::error('Hubo un error al cargar la imagen en la galería.');
+                    // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
                 }
             }else{
                 // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
@@ -151,12 +154,20 @@ class Import
             'name' => wp_basename($imagen_url),
             'tmp_name' => $imagen_url,
         );
-        
-        try {
-            $imagen_id = media_handle_sideload($file_array);
-        } catch (\Throwable $th) {
-            echo 'error side load';
+
+        // Incluir los archivos necesarios
+        if (!function_exists('media_handle_sideload')) {
+            require_once(ABSPATH . 'wp-admin/includes/file.php');
+            require_once(ABSPATH . 'wp-admin/includes/media.php');
+            require_once(ABSPATH . 'wp-admin/includes/image.php');
         }
+        
+        // dump_json($file_array, $imagen_url );
+        $imagen_id = media_handle_sideload($file_array);
+        // try {
+        // } catch (\Throwable $th) {
+        //     echo 'error side load';
+        // }
 
         if (is_wp_error($imagen_id)) {
             return false;
@@ -232,15 +243,6 @@ class Import
             case 'oficina':
                 return 'Oficinas';
                 break;
-        //  case 'local comercial':
-        //      return '';
-        //      break;
-        //  case 'consultorio':
-        //      return '';
-        //      break;
-        //  case 'hotel/apart hotel':
-        //      return '';
-        //      break;
             case 'finca productiva':
                 return 'Fincas';
                 break;
@@ -250,12 +252,8 @@ class Import
             case 'lote comercial':
                 return 'Lotes';
                 break;
-        //  case 'parqueadero':
-        //      return '';
-        //      break;
-            
             default:
-                return $property_type;
+                return  ucwords($property_type);
                 break;
         }
     }

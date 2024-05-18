@@ -52,7 +52,7 @@ class CommercialImport extends Import
 
             $post_data = array(
                 'ID'            => $post_id,
-                'post_title'    => $data['id'].' - '.$data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'],
+                'post_title'    => $data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
                 // 'post_status'   => 'publish', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
@@ -73,7 +73,7 @@ class CommercialImport extends Import
             $meta_datos['galeria-de-imagenes'] =  $gallery_ids;
 
             $post_data = array(
-                'post_title'    => $data['id'].' - '.$data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'],
+                'post_title'    =>$data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '. $data['id'],
                 'post_status'   => 'publish', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
@@ -91,13 +91,10 @@ class CommercialImport extends Import
                 $result_feature_img = $this->set_feature_img($post_id, $ruta_feature_img);
 
                 if (!$result_feature_img) {
-                    $post_data = array(
-                        'ID' => $post_id, // ID del post que quieres actualizar
-                        'post_status' => 'pending', // Estado deseado: borrador
-                    );
-                    // Actualizar el post usando wp_update_post()
-                    $updated = wp_update_post($post_data);
-                    // Log::info('El post cambio a estado pendiente');
+                    if(get_option('id_preview')){
+                        $imagen_id = get_option('id_preview');
+                        $result_thumb = set_post_thumbnail($post_id, $imagen_id);
+                    }
                 }
             }else{
                 // Log::info('Error al crear el inmueble');
