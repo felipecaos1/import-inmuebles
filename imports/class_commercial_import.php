@@ -12,8 +12,11 @@ class CommercialImport extends Import
     public function crear_inmueble($data)
     {
         // Log::info('Validando el inmueble comercial: '. $data['id']);
-
         $existing_post_id = $this->buscar_inmueble_por_id($data['id']);
+
+        $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
+        // funcion para crear un array con los id de las imagenes
+        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count']);
 
         // - street_name_es no llega
         $data['street_name_es'] = '';
@@ -49,6 +52,18 @@ class CommercialImport extends Import
         if ($existing_post_id) {
             // Actualiza el post existente
             $post_id = $existing_post_id;
+            $this->set_feature_img($post_id, $ruta_feature_img);
+
+            if($gallery_ids != '' ){
+                $new_gallery='';
+                $old_gallery = get_post_meta($post_id, 'galeria-de-imagenes', true);
+                if($old_gallery != '' ){
+                    $new_gallery .= $old_gallery.',';
+                }
+                $new_gallery .= $gallery_ids;
+
+                $meta_datos['galeria-de-imagenes'] =  $new_gallery;
+            }
 
             $post_data = array(
                 'ID'            => $post_id,
@@ -67,9 +82,7 @@ class CommercialImport extends Import
             }
 
         }else{
-            // funcion para crear un array con los id de las imagenes
-            $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count']);
-
+            
             $meta_datos['galeria-de-imagenes'] =  $gallery_ids;
 
             $post_data = array(
@@ -77,19 +90,17 @@ class CommercialImport extends Import
                 'post_status'   => 'publish', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
-            );
-    
-        
-            // Insertar el post usando wp_insert_post()
+            );        
+            // Crea un nuevo post
             $post_id = wp_insert_post($post_data);
 
             if (!is_wp_error($post_id)) {
                 // Log::info('Inmueble Creado');
 
-                $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
-
+                // Imagen destacada
                 $result_feature_img = $this->set_feature_img($post_id, $ruta_feature_img);
 
+                // Validar si se establecio la imagen destacada
                 if (!$result_feature_img) {
                     if(get_option('id_preview')){
                         $imagen_id = get_option('id_preview');

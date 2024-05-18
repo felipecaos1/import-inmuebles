@@ -11,11 +11,11 @@ class ResidentialImport extends Import
      */
     public function crear_inmueble($data)
     {
-        Log::info('Validando el inmueble residencial: '. $data['id']);
-
+        // Log::info('Validando el inmueble residencial: '. $data['id']);
         $existing_post_id = $this->buscar_inmueble_por_id($data['id']);
 
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
+        // funcion para crear un array con los id de las imagenes
         $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count']);
         
         // Metacampos
@@ -71,7 +71,7 @@ class ResidentialImport extends Import
             if (!is_wp_error($updated)) {
                 // Log::info('Inmueble Actualizado');
             } else {
-                Log::info('Error al actualizar el inmueble');
+                // Log::info('Error al actualizar el inmueble');
             }
 
         } else {
@@ -91,11 +91,9 @@ class ResidentialImport extends Import
                 // Log::info('Inmueble Creado');
 
                 // Imagen destacada
-
                 $result_feature_img = $this->set_feature_img($post_id, $ruta_feature_img);
 
-                // Validar si se establecio la imagen destacada o no para poner 
-                // el post en borrador
+                // Validar si se establecio la imagen destacada
                 if (!$result_feature_img) {
                     if(get_option('id_preview')){
                         $imagen_id = get_option('id_preview');
@@ -103,7 +101,7 @@ class ResidentialImport extends Import
                     }
                 }
             } else {
-                Log::info('Error al crear el inmueble');
+                // Log::info('Error al crear el inmueble');
             }
         }
 

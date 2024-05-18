@@ -1,6 +1,7 @@
 <?php
 
 function mi_plugin_inmuebles_menu() {
+
     add_menu_page(
         'Inmuebles MSL',
         'Inmuebles MLS',
@@ -10,6 +11,7 @@ function mi_plugin_inmuebles_menu() {
         'dashicons-building',
         30
     );
+    
      // Submenú
     add_submenu_page(
         'inuebles-mls', // ID del menú padre
@@ -20,5 +22,6 @@ function mi_plugin_inmuebles_menu() {
         'mi_plugin_inmuebles_pagina_config'
     );
 }
+
 add_action('admin_menu', 'mi_plugin_inmuebles_menu');
 

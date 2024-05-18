@@ -1,6 +1,5 @@
 <?php
 
-require IMPORTMLS_DIR . 'includes/class_log.php';
 require IMPORTMLS_DIR . 'includes/class_csv.php';
 require IMPORTMLS_DIR . 'imports/class_residential_import.php';
 require IMPORTMLS_DIR . 'imports/class_commercial_import.php';
@@ -76,7 +75,7 @@ class FileManager
      * @param string|null $date Fecha en formato 'Ymd' de la que se importarán los archivos. Si es nulo, se usa la fecha actual.
      */
     public function import($date = null)
-    {        
+    {
         set_time_limit(0);
         
         Log::info('Inicia la importación');
@@ -213,6 +212,36 @@ class FileManager
         } else {
             Log::error('El archivo '.$name_file.' no existe.');
         }
+    }
+
+    /**
+     * Asigna una imagen de vista previa si la opción 'id_preview' no está configurada.
+     * Este método se ejecuta solo cuando el plugin se activa.
+     */
+    public function assign_preview_image()
+    {
+        // Verifica si la opción 'id_preview' no está configurada
+        if(!get_option('id_preview')){
+
+            // Define la URL de la imagen de vista previa predeterminada
+            $url_preview = IMPORTMLS_DIR .'img/preview.jpg';
+
+            // Verifica si el archivo de la imagen de vista previa predeterminada existe
+            if(file_exists($url_preview)){
+                // Crea una instancia de la clase ResidentialImport
+                $import = new ResidentialImport();
+
+                // Carga la imagen de vista previa predeterminada y obtén su ID
+                $img_id = $import->load_image_and_get_id($url_preview);
+
+                // Si se obtiene el ID de la imagen correctamente
+                if($img_id){
+                    // Actualiza la opción 'id_preview' con el ID de la imagen
+                    update_option('id_preview', $img_id );
+                    Log::info("id_preview asignada con éxito");
+                }
+            }
+        }  
     }
 
 }

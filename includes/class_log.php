@@ -9,6 +9,7 @@ class Log
     const LEVEL_ERROR = 'error';
     const LEVEL_INFO = 'info';
     const LEVEL_DEBUG = 'debug';
+
     // Ruta al archivo de logs
     const LOG_FILE = IMPORTMLS_DIR . LOG_FILE;
     
@@ -28,8 +29,9 @@ class Log
         if (!empty($context)) {
             $logString .= ' ' . json_encode($context);
         }
+        
         // Guardamos el registro en el archivo de logs
-        file_put_contents(IMPORTMLS_DIR.LOG_FILE, $logString . PHP_EOL, FILE_APPEND);
+        file_put_contents(self::LOG_FILE, $logString . PHP_EOL, FILE_APPEND);
     }
 
     /**
@@ -79,7 +81,7 @@ class Log
     private static function ensure_log_file_exists()
     {
         // Verificar si el archivo de logs existe, sino crearlo
-        if (!file_exists(LOG_FILE)) {
+        if (!file_exists(self::LOG_FILE)) {
             $log = fopen(LOG_FILE, 'w');
             fclose($log);
         }

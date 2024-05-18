@@ -11,25 +11,17 @@ class Import
     {
         if ( file_exists( $ruta_feature_img ) ){
             $imagen_id = $this->load_image_and_get_id($ruta_feature_img);
-
-
             if ($imagen_id) {
                 $result_thumb = set_post_thumbnail($post_id, $imagen_id);
-
                 if (!is_wp_error($result_thumb)) {
-                    // Log::info('Se establecio la imagen destacada del post');
                     return true;
                 } else {
-                    // Log::info('Error estableciendo la imagen destacada del post');
                     return false;
                 }
-
             } else {
-                // Log::error('Hubo un error al cargar la imagen: '. $ruta_feature_img);
                 return false;
             }
         }else{
-            // Log::info('La imagen: '.$ruta_feature_img.' no existe');
             return false;
         } 
     }
@@ -110,8 +102,6 @@ class Import
      */
     protected function get_post_galery_ids($id_unique ='', $multi_count = 1 )
     {
-        // Log::error('Entro en galeria'. $multi_count);
-        
         $list_ids = [];
         for ($i=2; $i <= $multi_count ; $i++) {
             $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
@@ -138,7 +128,6 @@ class Import
         }
         $str_ids = implode(',', $list_ids );
 
-        // Log::info('Se creo la galería.');
         return $str_ids;
     }
 
@@ -148,7 +137,7 @@ class Import
      * @param string $imagen_url URL de la imagen a cargar.
      * @return int|bool Retorna el ID de la imagen cargada o false si no se pudo cargar.
      */
-    protected function load_image_and_get_id($imagen_url) 
+    public function load_image_and_get_id($imagen_url) 
     {
         $file_array = array(
             'name' => wp_basename($imagen_url),
@@ -162,13 +151,9 @@ class Import
             require_once(ABSPATH . 'wp-admin/includes/image.php');
         }
         
-        // dump_json($file_array, $imagen_url );
+        
         $imagen_id = media_handle_sideload($file_array);
-        // try {
-        // } catch (\Throwable $th) {
-        //     echo 'error side load';
-        // }
-
+        
         if (is_wp_error($imagen_id)) {
             return false;
         }else{

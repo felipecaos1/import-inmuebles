@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Import Inmuebles
-Plugin URI: https://tusitio.com/plugin
-Description: Consumir inmubles.
+'Plugin URI: https://tusitio.com/plugin
+Description: Realice la importación de inmuebles de la MLS de una forma sencilla.
 Version: 1.0
-Author: Caos
-Author URI: https://tusitio.com
+Author: Caos-Darsof't
+'Author URI: https://tusitio.com
 License: GPLv2 or later
 Text Domain: importM
 */

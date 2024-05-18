@@ -3,6 +3,7 @@
 require IMPORTMLS_DIR . 'includes/load_scripts.php';
 require IMPORTMLS_DIR . 'includes/create_menu.php';
 require IMPORTMLS_DIR . 'includes/set_mimes.php';
+require IMPORTMLS_DIR . 'includes/class_log.php';
 
 require IMPORTMLS_DIR . 'includes/class_file_manager.php';
 
@@ -13,25 +14,39 @@ function mi_plugin_importar_inmuebles()
     load_view('importar_inmuebles');
 }
 
+/**
+ * Obtiene la fecha actual formateada en español.
+ * Utiliza el formato '%A, %d de %B del %Y' por defecto.
+ * @return string La fecha actual formateada.
+ */
 function current_date() 
 {
+    // Define el formato de fecha
     $formato = '%A, %d de %B del %Y';
 
+    // Obtiene la marca de tiempo actual
     $timestamp = time();
 
+    // Nombres de los meses en español
     $meses_espanol = array(
         'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
         'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
     );
+
+    // Nombres de los días de la semana en español
     $dias_espanol = array(
         'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'
     );
 
+    // Reemplaza los marcadores de posición con los nombres de los meses y días en español
     $formato = str_replace('%B', $meses_espanol[date('n', $timestamp) - 1], $formato);
     $formato = str_replace('%A', $dias_espanol[date('w', $timestamp)], $formato);
 
+    // Formatea la fecha utilizando strftime
     $result = strftime($formato, $timestamp);
+    // Establece el locale a español
     setlocale(LC_TIME, 'es_ES.UTF-8');
+
     return $result;
 }
 
@@ -77,6 +92,7 @@ function guardar_credenciales_ftp()
     setlocale(LC_TIME, 'es_ES.UTF-8');
     setlocale(LC_TIME, 'es_ES.UTF-8');
     setlocale(LC_TIME, 'es_ES.UTF-8');
+
     if(isset($_POST['import-file'])){
         $import_files = new FileManager();
         $import_files->import();
@@ -119,8 +135,8 @@ function dump_json(...$vars): void
  * Esta función verifica si el parámetro 'batch_zip' está presente en la URL. Si el parámetro existe y 
  * su valor es un número válido, se crea una instancia de la clase FileManager y se llama al método 
  * load_all_zip con el valor del lote. Si el lote no es válido, se muestra un mensaje de error.
- * Url : http://alterna.test/?batch_zip=1
- * Url : http://alterna.test/?import=true
+ * Url : http://tusitio.com/?batch_zip=1
+ * Url : http://tusitio.com/?import=true
  * @return void
  */
 function custom_plugin_process_url() 
@@ -128,73 +144,36 @@ function custom_plugin_process_url()
     if (isset($_GET['batch_zip'])) {
         $batch = $_GET['batch_zip'];
         if ($batch != '' && is_numeric($batch)) {
-            $import_files = new FileManager();
-            $import_files->load_all_zip($batch);
+            $file_manager = new FileManager();
+            $file_manager->load_all_zip($batch);
             exit;
         }
         echo '<h1 style="color:red;">Ingresa un lote valido a ejecutar</h1>';
         exit;
     }
+    
     if (isset($_GET['import'])) {
         if ($_GET['import']) {
-            $import_files = new FileManager();
-            $import_files->import();
+            $file_manager = new FileManager();
+            $file_manager->import();
             exit;
         }
-        echo '<h1 style="color:red;">Ingresa un lote valido a ejecutar</h1>';
-        exit;
     }
-
-
 }
 
-add_action('admin_init', 'guardar_credenciales_ftp');
-add_action('init', 'custom_plugin_process_url');
+/**
+ * Función se ejecuta al activar el plugin
+ */
+function import_inmuebles_activate() 
+{
+    Log::info("Plugin activando");
 
-
-// Función que se ejecutará al activar el plugin
-function import_inmuebles_activate() {
-    // Log::info("Activando");
-    if(!get_option('id_preview')){
-        $url_preview = IMPORTMLS_DIR .'img/preview.jpg';
-        if(file_exists($url_preview)){
-            $img_id = load_image_and_get_id_custome($url_preview);
-            if($img_id){
-                update_option('id_preview', $img_id );
-            }
-        }
-    }    
+    $file_manager = new FileManager();
+    $file_manager->assign_preview_image();
 }
 
 // Registrar la función de activación
 register_activation_hook(IMPORTMLS_FILE, 'import_inmuebles_activate');
 
-
-function load_image_and_get_id_custome($imagen_url) 
-{
-    $file_array = array(
-        'name' => wp_basename($imagen_url),
-        'tmp_name' => $imagen_url,
-    );
-
-    // Incluir los archivos necesarios
-    if (!function_exists('media_handle_sideload')) {
-        require_once(ABSPATH . 'wp-admin/includes/file.php');
-        require_once(ABSPATH . 'wp-admin/includes/media.php');
-        require_once(ABSPATH . 'wp-admin/includes/image.php');
-    }
-    
-    // dump_json($file_array, $imagen_url );
-    $imagen_id = media_handle_sideload($file_array);
-    // try {
-    // } catch (\Throwable $th) {
-    //     echo 'error side load';
-    // }
-
-    if (is_wp_error($imagen_id)) {
-        return false;
-    }else{
-        echo is_wp_error($imagen_id);
-    }
-    return $imagen_id;
-}
+add_action('admin_init', 'guardar_credenciales_ftp');
+add_action('init', 'custom_plugin_process_url');

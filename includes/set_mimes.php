@@ -7,4 +7,5 @@ function modificar_tipo_mime_lxx($mimes) {
     }
     return $mimes;
 }
+
 add_filter('upload_mimes', 'modificar_tipo_mime_lxx');
