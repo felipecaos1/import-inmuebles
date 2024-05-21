@@ -11,7 +11,7 @@ class ResidentialImport extends Import
      */
     public function crear_inmueble($data)
     {
-        // Log::info('Validando el inmueble residencial: '. $data['id']);
+        Log::info('Validando el inmueble residencial: '. $data['id']);
         $existing_post_id = $this->buscar_inmueble_por_id($data['id']);
 
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';

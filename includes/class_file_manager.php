@@ -23,7 +23,12 @@ class FileManager
         if($ftp_server && $ftp_user && $ftp_pass && $ftp_file){
             $ftp = ftp_connect( $ftp_server );
             ftp_login( $ftp, $ftp_user, $ftp_pass );
-            return $ftp; // Retornar el recurso de conexión FTP
+            if($ftp){
+                Log::info('Conectado al servidor FTP');
+                return $ftp; // Retornar el recurso de conexión FTP
+            }else{
+                return false; // Retornar false si faltan credenciales
+            }
         }else{
             return false; // Retornar false si faltan credenciales
         }
@@ -54,13 +59,14 @@ class FileManager
             $archivosParaProcesar = array_slice($archivosZip, $inicio, 30); // Obtener el lote de archivos a procesar
     
             foreach ($archivosParaProcesar as $key => $archivoZip) {
-                $this->download_file($archivoZip,DIR_NAME_TEMP);
+                $this->download_file($archivoZip,DIR_NAME_TEMP, $ftp);
                 $this->import_file($archivoZip, 'zip');
                 $this->delete_file($archivoZip);
             }
     
             Log::info("La importación de los archivos ZIP fue exitosa");
             Log::info("Total archivos = " . count($archivosZip) . " : numero peticion url = " . $cant);
+            ftp_close($ftp);
             return json_encode(['message' => 'La importación de los archivos ZIP fue exitosa', 'Total zips' =>$archivosZip]);
     
         } catch (\Exception $e) {
@@ -87,20 +93,26 @@ class FileManager
         $commercialFile = "/com{$date}.csv";
         $zip = "/photo{$date}.zip";
         
-        //Procesar zip
-        $this->download_file($zip,DIR_NAME_TEMP);
+        $ftp = $this->my_ftp_connect();
+        //descargar archivos
+        $this->download_file($zip,DIR_NAME_TEMP, $ftp);
+        $this->download_file($commercialFile,DIR_NAME_TEMP, $ftp);
+        $this->download_file($residentialFile,DIR_NAME_TEMP, $ftp);
+        
+        ftp_close($ftp);
+        
+        // Procesar Zip
         $this->import_file($zip,'zip');
         $this->delete_file($zip);
 
-        //Procesar Residencial
-        $this->download_file($residentialFile,DIR_NAME_TEMP);
-        $this->import_file($residentialFile,'residential');
-        $this->delete_file($residentialFile);
-        
         //Procesar Comercial
-        $this->download_file($commercialFile,DIR_NAME_TEMP);
         $this->import_file($commercialFile,'commercial');
         $this->delete_file($commercialFile);
+        
+        //Procesar Residencial
+        $this->import_file($residentialFile,'residential');
+        $this->delete_file($residentialFile);
+
     }
 
     /**
@@ -110,12 +122,11 @@ class FileManager
      * @param string $path Ruta local donde se almacenará el archivo descargado.
      * @return bool True si la descarga fue exitosa, false si hubo un error.
      */
-    private function download_file($name_file, $path) 
+    private function download_file($name_file, $path, $ftp) 
     {
         $response = false;
-        $ftp = $this->my_ftp_connect();
+        // $ftp = $this->my_ftp_connect();
         if ($ftp) {
-            Log::info('Conectado al servidor FTP');
             // Verifica si el archivo existe en el servidor FTP
             $files = ftp_nlist($ftp, '/');
             if (in_array($name_file, $files)) {
@@ -132,7 +143,7 @@ class FileManager
             } else {
                 Log::info('Archivo no encontrado en el servidor FTP: ' . $name_file);
             }
-            ftp_close($ftp);
+            // ftp_close($ftp);
         } else {
             Log::error('Error al conectar al FTP.');
         }

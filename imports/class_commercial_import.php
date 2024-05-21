@@ -11,11 +11,12 @@ class CommercialImport extends Import
      */
     public function crear_inmueble($data)
     {
-        // Log::info('Validando el inmueble comercial: '. $data['id']);
+        Log::info('Validando el inmueble comercial: '. $data['id']);
         $existing_post_id = $this->buscar_inmueble_por_id($data['id']);
 
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
         // funcion para crear un array con los id de las imagenes
+        //$result = $this->consultar_datos_por_id($data['id'])
         $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count']);
 
         // - street_name_es no llega
@@ -87,7 +88,8 @@ class CommercialImport extends Import
 
             $post_data = array(
                 'post_title'    =>$data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '. $data['id'],
-                'post_status'   => 'publish', 
+                // 'post_status'   => 'publish', 
+                'post_status'   => 'pending', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
             );        
@@ -96,16 +98,17 @@ class CommercialImport extends Import
 
             if (!is_wp_error($post_id)) {
                 // Log::info('Inmueble Creado');
-
                 // Imagen destacada
                 $result_feature_img = $this->set_feature_img($post_id, $ruta_feature_img);
-
+                
                 // Validar si se establecio la imagen destacada
                 if (!$result_feature_img) {
                     if(get_option('id_preview')){
                         $imagen_id = get_option('id_preview');
                         $result_thumb = set_post_thumbnail($post_id, $imagen_id);
                     }
+                }else{
+                    // $this->insertar_datos_en_tabla($data['unique_id'], 1 , null);
                 }
             }else{
                 // Log::info('Error al crear el inmueble');

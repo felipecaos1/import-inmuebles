@@ -14,5 +14,6 @@
 -Función masiva para desactivar/activar inmuebles mls
 
 
--PREGUNTAS REUINIÓN 
---Sobre la creación de tipos de inmubles
+PROXIMAS VERSIONES 
+
+-Capturar errores en al descarga de un archivo de la importación masiva inicial, para volver a procesarlo

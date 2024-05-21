@@ -85,7 +85,7 @@ function guardar_credenciales_ftp()
         update_option('ftp_pass', $ftp_pass);
         update_option('ftp_path', $ftp_path);
 
-        echo '<div class="notice notice-success"><p>Credenciales FTP guardadas correctamente.</p></div>';
+        echo '<div class="notice notice-success notice-import"><p>Credenciales FTP guardadas correctamente.</p></div>';
     }
 
     setlocale(LC_TIME, 'es_ES.UTF-8');
@@ -135,8 +135,10 @@ function dump_json(...$vars): void
  * Esta función verifica si el parámetro 'batch_zip' está presente en la URL. Si el parámetro existe y 
  * su valor es un número válido, se crea una instancia de la clase FileManager y se llama al método 
  * load_all_zip con el valor del lote. Si el lote no es válido, se muestra un mensaje de error.
- * Url : http://tusitio.com/?batch_zip=1
- * Url : http://tusitio.com/?import=true
+ * Url : http://alterna.test/?batch_zip=1
+ * Url : http://alterna.test/?import=true&import_type=res
+ * Url : http://alterna.test/?import=true&import_type=com
+ * Url : http://alterna.test/?import=true&import_type=zip
  * @return void
  */
 function custom_plugin_process_url() 
@@ -170,6 +172,27 @@ function import_inmuebles_activate()
 
     $file_manager = new FileManager();
     $file_manager->assign_preview_image();
+
+    // create_table_db();
+}
+
+
+function create_table_db() {
+    global $wpdb;
+
+    $tabla_nombre = $wpdb->prefix . TABLE_NAME;
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $tabla_nombre (
+        id mediumint(9) NOT NULL AUTO_INCREMENT,
+        unique_id varchar(8) NOT NULL,
+        feature_img boolean NOT NULL DEFAULT 0,
+        post_galery_insert varchar(255) NULL,
+        PRIMARY KEY  (id)
+    ) $charset_collate;";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
 }
 
 // Registrar la función de activación

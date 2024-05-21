@@ -89,7 +89,7 @@ class Import
             return $result; // Retornar el error para manejo externo
         }
     
-        Log::info('Se establecio la taxonomia: '. $tax);
+        // Log::info('Se establecio la taxonomia: '. $tax);
         return true;
     }
     
@@ -100,6 +100,53 @@ class Import
      * @param int $multi_count Número de imágenes en la galería.
      * @return string Retorna un string con los IDs de las imágenes cargadas, separados por comas.
      */
+    // protected function get_post_galery_ids($id_unique ='', $multi_count = 1, $post_galery_insert = '')
+    // {
+    //     // $post_galery_insert = "2,4,5,6"; //Resultados de la base de datos
+    //     $post_galery_insert = explode(',', $post_galery_insert); // Arreglo con los datos convertidos
+    //     $count_galery_insert = count($post_galery_insert);
+
+    //     $list_ids = [];
+
+    //     for ($i=2; $i <= $multi_count ; $i++) {
+    //         if($count_galery_insert >= ($multi_count - 1)){ // Verifico si cantidad de de imagenes insertadas es mayor o igual a las que se van a procesar, pare el proceso
+    //             break;
+    //         }
+    //         if(!in_array($i,$post_galery_insert)){ //Se valida que solo ingrese los que no esten en el resultado de la base de datos
+
+    //             $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
+    //             $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
+    //             if ( file_exists( $ruta_img ) ){
+    //                 if($i==2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
+    //                     $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
+    //                     $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
+    //                     if (is_wp_error($result)) {
+    //                         Log::error('Hubo un error al convertir la imagen '.$id_unique.$ext);
+    //                     }else{
+    //                         $ruta_img = $destination_path;
+    //                     }
+    //                 }
+    //                 $imagen_id = $this->load_image_and_get_id($ruta_img);
+    //                 if ($imagen_id) {
+    //                     $list_ids[]= $imagen_id;
+    //                     $post_galery_insert[] = $i; //Agregamos el valor de $i al arreglo
+    //                 } else {
+    //                     // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
+    //                 }
+    //             }else{
+    //                 // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
+    //             }
+
+    //         }
+
+    //     }
+
+    //     $post_galery_insert = implode(',', $post_galery_insert );//Lo convertimos en cadena nuevamente para poderlo guardar en la base de datos
+
+    //     $str_ids = implode(',', $list_ids );
+
+    //     return $str_ids;
+    // }
     protected function get_post_galery_ids($id_unique ='', $multi_count = 1 )
     {
         $list_ids = [];
@@ -214,7 +261,7 @@ class Import
                 return 'Apartamentos';
                 break;
             case 'lote residencial':
-                return 'Lote';
+                return 'Lotes';
                 break;
             case 'casa':
                 return 'Casas';
@@ -275,8 +322,61 @@ class Import
             // return $result;
             return false;
         }
-    
+        
+        unlink($source_path);  
         return true;
     }
+
+    private function insertar_datos_en_tabla($unique_id, $feature_img, $post_galery_insert) {
+        global $wpdb;
+    
+        $tabla_nombre = $wpdb->prefix . TABLE_NAME;
+    
+        $wpdb->insert(
+            $tabla_nombre,
+            array(
+                'unique_id' => $unique_id,
+                'feature_img' => $feature_img,
+                'post_galery_insert' => $post_galery_insert,
+            )
+        );
+    
+        return $wpdb->insert_id;
+    }
+
+    private function consultar_datos_por_id($unique_id) {
+        global $wpdb;
+    
+        $tabla_nombre = $wpdb->prefix . TABLE_NAME;
+    
+        $resultado = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $tabla_nombre WHERE unique_id = %d",
+            $unique_id
+        ));
+    
+        return $resultado;
+    }
+
+    private function actualizar_datos_por_codigo($unique_id, $feature_img, $post_galery_insert) {
+        global $wpdb;
+        $tabla_nombre = $wpdb->prefix . 'mi_tabla_personalizada';
+    
+        $resultado = $wpdb->update(
+            $tabla_nombre,
+            array(
+                'feature_img' => $feature_img,
+                'post_galery_insert' => $post_galery_insert,
+            ),
+            array('unique_id' => $unique_id),
+            array(
+                '%d', // Formato para 'activo' (boolean)
+                '%s'  // Formato para 'descripcion' (string)
+            ),
+            array('%s') // Formato para 'codigo' (string)
+        );
+    
+        return $resultado !== false;
+    }
+    
 
 }

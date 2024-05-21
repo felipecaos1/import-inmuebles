@@ -9,6 +9,6 @@
     margin-top: 20px;
 }
 
-.noti-none .notice{
+.noti-none .notice:not(.notice-import) {
     display: none!important;
 }

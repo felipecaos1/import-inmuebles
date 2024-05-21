@@ -39,7 +39,7 @@ class Csv
                             $csv_data = []; // Reiniciar el array para el siguiente lote
                         }
                     }
-                    // if($counter == 30){
+                    // if($counter == 3){
                     //     break;
                     // }
                     $counter++;
