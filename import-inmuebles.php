@@ -19,7 +19,7 @@ define( 'IMPORTMLS_FILE', __FILE__ );
 define( 'IMPORTMLS_DIR', plugin_dir_path( IMPORTMLS_FILE ) );
 define('PLUGIN_BASE_URL', plugins_url('/', IMPORTMLS_FILE));
 define( 'IMPORTMLS_BASENAME', plugin_basename( IMPORTMLS_FILE ) );
-define( 'TABLE_NAME', 'import_img_logs' );
+define( 'TABLE_NAME', 'import_inmuebles_logs' );
 define( 'LOG_FILE', 'import-inmubles.log');
 // Define la ruta del directorio de archivos temporales del plugin
 define( 'DIR_NAME_TEMP', plugin_basename( 'data/temp' ) );

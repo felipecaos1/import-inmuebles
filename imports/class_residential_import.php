@@ -4,6 +4,13 @@ require_once IMPORTMLS_DIR . 'imports/class_import.php';
 
 class ResidentialImport extends Import
 {
+    private $data_result;
+    private $inmueble;
+    
+    public function __construct($data_result = []) {
+        $this->data_result = $data_result;
+    }
+
     /**
      * Crea una nueva entrada de propiedad en WordPress utilizando los datos proporcionados.
      *
@@ -11,13 +18,19 @@ class ResidentialImport extends Import
      */
     public function crear_inmueble($data)
     {
-        Log::info('Validando el inmueble residencial: '. $data['id']);
-        $existing_post_id = $this->buscar_inmueble_por_id($data['id']);
-
-        $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
-        // funcion para crear un array con los id de las imagenes
-        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count']);
+        $key = array_search($data['unique_id'], array_column($this->data_result, 'unique_id'));
+        if ($key !== false) {
+            $this->inmueble = $this->data_result[$key];
+        } else {
+            $this->inmueble = $this->insert_data_into_table($data['unique_id'],'residential');
+        }
         
+        // $existing_post_id = $this->buscar_inmueble_por_id($data['id']);        
+        $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
+
+        // funcion para crear un array con los id de las imagenes
+        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
+
         // Metacampos
         $meta_datos = array(
             'valor' => $data['price_current'],
@@ -42,10 +55,17 @@ class ResidentialImport extends Import
             'is_mls' => true
         );
 
-        if ($existing_post_id) {
+        if ($this->inmueble->post_created) {
             // Actualiza el post existente
-            $post_id = $existing_post_id;
-            $this->set_feature_img($post_id, $ruta_feature_img);
+
+            $post_id = $this->inmueble->post_created;
+
+            if(!$this->inmueble->feature_img){
+                $feature_img = $this->set_feature_img($post_id, $ruta_feature_img);
+                if($feature_img){
+                    $this->update_by_unique_id($data['unique_id'],['feature_img' => true]);
+                }
+            }
 
             if($gallery_ids != '' ){
                 $new_gallery='';
@@ -87,9 +107,7 @@ class ResidentialImport extends Import
             // Crea un nuevo post
             $post_id = wp_insert_post($post_data);
 
-            if (!is_wp_error($post_id)) {
-                // Log::info('Inmueble Creado');
-
+            if (!is_wp_error($post_id)) {                
                 // Imagen destacada
                 $result_feature_img = $this->set_feature_img($post_id, $ruta_feature_img);
 
@@ -99,7 +117,8 @@ class ResidentialImport extends Import
                         $imagen_id = get_option('id_preview');
                         $result_thumb = set_post_thumbnail($post_id, $imagen_id);
                     }
-                }
+                }                
+                $this->update_by_unique_id($data['unique_id'],['post_created' => $post_id,'feature_img' => $result_feature_img]);
             } else {
                 // Log::info('Error al crear el inmueble');
             }

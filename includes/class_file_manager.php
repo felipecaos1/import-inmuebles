@@ -78,13 +78,14 @@ class FileManager
      * Importa archivos de datos de inmuebles (residenciales y comerciales) y fotos de inmuebles.
      * Los archivos se descargan, se importan a la base de datos y luego se eliminan.
      *
+     * @param string $import_type tipo de importación a realizar
      * @param string|null $date Fecha en formato 'Ymd' de la que se importarán los archivos. Si es nulo, se usa la fecha actual.
      */
-    public function import($date = null)
+    public function import($import_type,$date = null)
     {
         set_time_limit(0);
         
-        Log::info('Inicia la importación');
+        Log::info('Inicia la importación de '.$import_type);
         if($date == null){
             $date = date('Ymd');
         }
@@ -93,26 +94,28 @@ class FileManager
         $commercialFile = "/com{$date}.csv";
         $zip = "/photo{$date}.zip";
         
-        $ftp = $this->my_ftp_connect();
-        //descargar archivos
-        $this->download_file($zip,DIR_NAME_TEMP, $ftp);
-        $this->download_file($commercialFile,DIR_NAME_TEMP, $ftp);
-        $this->download_file($residentialFile,DIR_NAME_TEMP, $ftp);
-        
-        ftp_close($ftp);
-        
-        // Procesar Zip
-        $this->import_file($zip,'zip');
-        $this->delete_file($zip);
+        if($import_type == 'zip'){
+            
+            $ftp = $this->my_ftp_connect();
+            //descargar archivos
+            // $this->download_file($zip,DIR_NAME_TEMP, $ftp);
+            $this->download_file($commercialFile,DIR_NAME_TEMP, $ftp);
+            $this->download_file($residentialFile,DIR_NAME_TEMP, $ftp);        
+    
+            // Procesar Zip
+            // $this->import_file($zip,'zip');
+            // $this->delete_file($zip);
+            ftp_close($ftp);
 
-        //Procesar Comercial
-        $this->import_file($commercialFile,'commercial');
-        $this->delete_file($commercialFile);
-        
-        //Procesar Residencial
-        $this->import_file($residentialFile,'residential');
-        $this->delete_file($residentialFile);
-
+        }else if($import_type == 'commercial'){
+            //Procesar Comercial
+            $this->import_file($commercialFile,'commercial');
+            $this->delete_file($commercialFile);
+        }else if($import_type == 'residential'){
+            //Procesar Residencial
+            $this->import_file($residentialFile,'residential');
+            $this->delete_file($residentialFile);
+        }
     }
 
     /**
@@ -154,19 +157,24 @@ class FileManager
      * Importa un archivo CSV o descomprimir un ZIP.
      *
      * @param string $name_file Nombre del archivo a importar.
-     * @param string $import_type Tipo de archivo a importar ('csv' o 'zip').
+     * @param string $import_type Tipo de archivo a importar ('commercial', 'residential' o 'zip').
      */
     private function import_file($name_file,$import_type)
     {
         if($import_type == 'residential'){
-            // Importar archivo CSV
-            if(Csv::import(new ResidentialImport(),DIR_NAME_TEMP.'/'.$name_file)){
+            $res = new ResidentialImport();
+            $data = $res->get_data_by_import_type($import_type);
+            
+            if(Csv::import(new ResidentialImport($data),DIR_NAME_TEMP.'/'.$name_file)){
                 update_option('import_res', true);
             }else{
                 update_option('import_res', false);
             }
         }elseif($import_type == 'commercial'){ 
-            if(Csv::import(new CommercialImport(),DIR_NAME_TEMP.'/'.$name_file)){
+            $com = new CommercialImport();
+            $data = $com->get_data_by_import_type($import_type);
+
+            if(Csv::import(new CommercialImport($data),DIR_NAME_TEMP.'/'.$name_file)){
                 update_option('import_com', true);
             }else{
                 update_option('import_com', false);

@@ -136,9 +136,9 @@ function dump_json(...$vars): void
  * su valor es un número válido, se crea una instancia de la clase FileManager y se llama al método 
  * load_all_zip con el valor del lote. Si el lote no es válido, se muestra un mensaje de error.
  * Url : http://alterna.test/?batch_zip=1
- * Url : http://alterna.test/?import=true&import_type=res
- * Url : http://alterna.test/?import=true&import_type=com
- * Url : http://alterna.test/?import=true&import_type=zip
+ * Url : http://alterna.test/?import=commercial    &date=20240314
+ * Url : http://alterna.test/?import=residential   &date=20240314
+ * Url : http://alterna.test/?import=zip           &date=20240314
  * @return void
  */
 function custom_plugin_process_url() 
@@ -155,9 +155,11 @@ function custom_plugin_process_url()
     }
     
     if (isset($_GET['import'])) {
-        if ($_GET['import']) {
+        $import_type = $_GET['import'];
+        $date = isset($_GET['date']) ? $_GET['date'] : null;
+        if ($import_type != '') {
             $file_manager = new FileManager();
-            $file_manager->import();
+            $file_manager->import($import_type,$date);
             exit;
         }
     }
@@ -173,21 +175,24 @@ function import_inmuebles_activate()
     $file_manager = new FileManager();
     $file_manager->assign_preview_image();
 
-    // create_table_db();
+    create_table_db();
 }
 
 
-function create_table_db() {
+function create_table_db() 
+{
     global $wpdb;
 
     $tabla_nombre = $wpdb->prefix . TABLE_NAME;
     $charset_collate = $wpdb->get_charset_collate();
 
     $sql = "CREATE TABLE $tabla_nombre (
-        id mediumint(9) NOT NULL AUTO_INCREMENT,
-        unique_id varchar(8) NOT NULL,
-        feature_img boolean NOT NULL DEFAULT 0,
-        post_galery_insert varchar(255) NULL,
+        id mediumint(9)     NOT NULL AUTO_INCREMENT,
+        unique_id           varchar(8) NOT NULL,
+        feature_img         boolean NOT NULL DEFAULT 0,
+        post_created         int(11) NULL,
+        post_galery_insert  varchar(255) NULL,
+        import_type          varchar(255) NULL,
         PRIMARY KEY  (id)
     ) $charset_collate;";
 

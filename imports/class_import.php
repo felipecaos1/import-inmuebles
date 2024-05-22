@@ -15,6 +15,7 @@ class Import
                 $result_thumb = set_post_thumbnail($post_id, $imagen_id);
                 if (!is_wp_error($result_thumb)) {
                     return true;
+                    
                 } else {
                     return false;
                 }
@@ -100,79 +101,56 @@ class Import
      * @param int $multi_count Número de imágenes en la galería.
      * @return string Retorna un string con los IDs de las imágenes cargadas, separados por comas.
      */
-    // protected function get_post_galery_ids($id_unique ='', $multi_count = 1, $post_galery_insert = '')
-    // {
-    //     // $post_galery_insert = "2,4,5,6"; //Resultados de la base de datos
-    //     $post_galery_insert = explode(',', $post_galery_insert); // Arreglo con los datos convertidos
-    //     $count_galery_insert = count($post_galery_insert);
-
-    //     $list_ids = [];
-
-    //     for ($i=2; $i <= $multi_count ; $i++) {
-    //         if($count_galery_insert >= ($multi_count - 1)){ // Verifico si cantidad de de imagenes insertadas es mayor o igual a las que se van a procesar, pare el proceso
-    //             break;
-    //         }
-    //         if(!in_array($i,$post_galery_insert)){ //Se valida que solo ingrese los que no esten en el resultado de la base de datos
-
-    //             $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
-    //             $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
-    //             if ( file_exists( $ruta_img ) ){
-    //                 if($i==2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
-    //                     $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
-    //                     $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
-    //                     if (is_wp_error($result)) {
-    //                         Log::error('Hubo un error al convertir la imagen '.$id_unique.$ext);
-    //                     }else{
-    //                         $ruta_img = $destination_path;
-    //                     }
-    //                 }
-    //                 $imagen_id = $this->load_image_and_get_id($ruta_img);
-    //                 if ($imagen_id) {
-    //                     $list_ids[]= $imagen_id;
-    //                     $post_galery_insert[] = $i; //Agregamos el valor de $i al arreglo
-    //                 } else {
-    //                     // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
-    //                 }
-    //             }else{
-    //                 // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
-    //             }
-
-    //         }
-
-    //     }
-
-    //     $post_galery_insert = implode(',', $post_galery_insert );//Lo convertimos en cadena nuevamente para poderlo guardar en la base de datos
-
-    //     $str_ids = implode(',', $list_ids );
-
-    //     return $str_ids;
-    // }
-    protected function get_post_galery_ids($id_unique ='', $multi_count = 1 )
+    protected function get_post_galery_ids($id_unique, $multi_count, $post_galery_insert)
     {
         $list_ids = [];
-        for ($i=2; $i <= $multi_count ; $i++) {
-            $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
-            $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
-            if ( file_exists( $ruta_img ) ){
-                if($i==2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
-                    $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
-                    $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
-                    if (is_wp_error($result)) {
-                        Log::error('Hubo un error al convertir la imagen '.$id_unique.$ext);
-                    }else{
-                        $ruta_img = $destination_path;
-                    }
-                }
-                $imagen_id = $this->load_image_and_get_id($ruta_img);
-                if ($imagen_id) {
-                    $list_ids[]= $imagen_id;
-                } else {
-                    // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
-                }
-            }else{
-                // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
-            }
+        $save_post_galery_insert = true;
+
+        if (!empty($post_galery_insert)) {
+            $post_galery_insert = explode(',', $post_galery_insert); // Arreglo con los datos convertidos
+        }else{
+            $post_galery_insert = [];
         }
+
+        $count_galery_insert = count($post_galery_insert);
+
+        for ($i=2; $i <= $multi_count ; $i++) {            
+            if($count_galery_insert >= ($multi_count - 1)){ // Verifico si cantidad de de imagenes insertadas es mayor o igual a las que se van a procesar, pare el proceso
+                $save_post_galery_insert = false;
+                break;
+            }
+            if(!in_array($i,$post_galery_insert)){ //Se valida que solo ingrese los que no esten en el resultado de la base de datos                
+                $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
+                $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
+                if ( file_exists( $ruta_img ) ){
+                    if($i === 2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
+                        $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
+                        $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
+                        if (is_wp_error($result)) {
+                            Log::error('Hubo un error al convertir la imagen '.$id_unique.$ext);
+                        }else{
+                            $ruta_img = $destination_path;
+                        }
+                    }
+                    $imagen_id = $this->load_image_and_get_id($ruta_img);
+                    if ($imagen_id) {
+                        $list_ids[]= $imagen_id;
+                        $post_galery_insert[]= $i; //Agregamos el valor de $i al arreglo
+                    } else {
+                        // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
+                    }
+                }else{
+                    // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
+                }
+            }
+
+        }
+        
+        if($save_post_galery_insert){
+            $post_galery_insert = implode(',', $post_galery_insert );//Lo convertimos en cadena nuevamente para poderlo guardar en la base de datos
+            $this->update_by_unique_id($id_unique,['post_galery_insert' => $post_galery_insert]);
+        }
+
         $str_ids = implode(',', $list_ids );
 
         return $str_ids;
@@ -327,7 +305,16 @@ class Import
         return true;
     }
 
-    private function insertar_datos_en_tabla($unique_id, $feature_img, $post_galery_insert) {
+    /**
+     * Insert data into the database table.
+     *
+     * @param string $unique_id   The unique ID.
+     * @param string $import_type The import type.
+     *
+     * @return int|false The inserted row ID or false on failure.
+     */
+    protected function insert_data_into_table($unique_id, $import_type)
+    {
         global $wpdb;
     
         $tabla_nombre = $wpdb->prefix . TABLE_NAME;
@@ -336,43 +323,65 @@ class Import
             $tabla_nombre,
             array(
                 'unique_id' => $unique_id,
-                'feature_img' => $feature_img,
-                'post_galery_insert' => $post_galery_insert,
+                'feature_img' => 0,
+                'post_created' => 0,
+                'post_galery_insert' => null,
+                'import_type' => $import_type
             )
         );
     
-        return $wpdb->insert_id;
+        $insert_id = $wpdb->insert_id;
+        return $wpdb->get_row("SELECT * FROM $tabla_nombre WHERE id = $insert_id");
     }
 
-    private function consultar_datos_por_id($unique_id) {
+    protected function get_by_unique_id($unique_id) 
+    {
         global $wpdb;
     
         $tabla_nombre = $wpdb->prefix . TABLE_NAME;
     
-        $resultado = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $tabla_nombre WHERE unique_id = %d",
-            $unique_id
-        ));
+        $resultado = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM $tabla_nombre WHERE unique_id = %d", $unique_id
+            )
+        );
     
         return $resultado;
     }
 
-    private function actualizar_datos_por_codigo($unique_id, $feature_img, $post_galery_insert) {
+    public function get_data_by_import_type($import_type) 
+    {
         global $wpdb;
-        $tabla_nombre = $wpdb->prefix . 'mi_tabla_personalizada';
+    
+        $tabla_nombre = $wpdb->prefix . TABLE_NAME;
+    
+        // Consulta SQL para recuperar los datos
+        $sql = $wpdb->prepare("SELECT * FROM $tabla_nombre WHERE import_type = %s", $import_type);
+    
+        // Ejecutar la consulta
+        $results = $wpdb->get_results($sql);
+    
+        // Verificar si se encontraron resultados
+        if ($results) {
+            // Devolver los resultados
+            return $results;
+        } else {
+            // No se encontraron resultados
+            return [];
+        }
+    }
+
+    protected function update_by_unique_id($unique_id, $data) 
+    {
+        global $wpdb;
+        $tabla_nombre = $wpdb->prefix . TABLE_NAME;
     
         $resultado = $wpdb->update(
             $tabla_nombre,
-            array(
-                'feature_img' => $feature_img,
-                'post_galery_insert' => $post_galery_insert,
-            ),
+            $data,
             array('unique_id' => $unique_id),
-            array(
-                '%d', // Formato para 'activo' (boolean)
-                '%s'  // Formato para 'descripcion' (string)
-            ),
-            array('%s') // Formato para 'codigo' (string)
+            array('%s'), // Formato para 'unique_id' (string)
+            array('%s')  // Formato para 'post_galery_insert' (string)
         );
     
         return $resultado !== false;
