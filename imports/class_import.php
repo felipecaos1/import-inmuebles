@@ -105,6 +105,7 @@ class Import
     {
         $list_ids = [];
         $save_post_galery_insert = true;
+        $cont_porcess = 1;
 
         if (!empty($post_galery_insert)) {
             $post_galery_insert = explode(',', $post_galery_insert); // Arreglo con los datos convertidos
@@ -119,7 +120,13 @@ class Import
                 $save_post_galery_insert = false;
                 break;
             }
-            if(!in_array($i,$post_galery_insert)){ //Se valida que solo ingrese los que no esten en el resultado de la base de datos                
+            if($count_galery_insert >= 6){ //Validar que tengan N catidad o menos en la base de datos, si las tiene para el bucle
+                break;
+            }
+            if(!in_array($i,$post_galery_insert)){ //Se valida que solo ingrese los que no esten en el resultado de la base de datos 
+                if($cont_porcess > 2){ //Solo permitir N proceso para cargue de las imagenes
+                    break;
+                }
                 $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
                 $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
                 if ( file_exists( $ruta_img ) ){
@@ -139,6 +146,7 @@ class Import
                     } else {
                         // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
                     }
+                    $cont_porcess ++;
                 }else{
                     // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
                 }

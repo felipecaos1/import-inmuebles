@@ -42,18 +42,18 @@ class FileManager
      */
     public function load_all_zip($cant = 1)
     {
-        set_time_limit(0);
-        ini_set('max_execution_time', 3600);    
+        set_time_limit(0);    
+        ini_set('max_execution_time', 3600);
         try {
             Log::info("Iniciando la importación de los archivos ZIP");
             
             $ftp = $this->my_ftp_connect();
+            ftp_pasv($ftp, true);
             $archivos = ftp_nlist($ftp, '/');
-
             $archivosZip = array_filter($archivos, function ($archivo) {
                 return pathinfo($archivo, PATHINFO_EXTENSION) == 'zip' && strpos($archivo, 'photo_ofc') === false;
             });
-    
+
             $inicio = ($cant - 1) * 30; // Calcular el índice de inicio basado en la cantidad y el tamaño del lote
             $fin = $cant * 30; // Calcular el índice de fin
     
@@ -82,13 +82,15 @@ class FileManager
      * @param string $import_type tipo de importación a realizar
      * @param string|null $date Fecha en formato 'Ymd' de la que se importarán los archivos. Si es nulo, se usa la fecha actual.
      */
-    public function import($import_type,$date = null)
+    public function import($import_type,$date = '20240522')
     {
         set_time_limit(0);
         
         Log::info('Inicia la importación de '.$import_type);
+
         if($date == null){
-            $date = date('Ymd');
+            // $date = date('Ymd');
+            $date = '20240522';
         }
 
         $residentialFile = "/res{$date}.csv";
@@ -98,14 +100,15 @@ class FileManager
         if($import_type == 'zip'){
             
             $ftp = $this->my_ftp_connect();
+            ftp_pasv($ftp, true);
             //descargar archivos
-            // $this->download_file($zip,DIR_NAME_TEMP, $ftp);
+            $this->download_file($zip,DIR_NAME_TEMP, $ftp);
             $this->download_file($commercialFile,DIR_NAME_TEMP, $ftp);
             $this->download_file($residentialFile,DIR_NAME_TEMP, $ftp);        
     
             // Procesar Zip
-            // $this->import_file($zip,'zip');
-            // $this->delete_file($zip);
+            $this->import_file($zip,'zip');
+            $this->delete_file($zip);
             ftp_close($ftp);
 
         }else if($import_type == 'commercial'){
@@ -117,6 +120,8 @@ class FileManager
             $this->import_file($residentialFile,'residential');
             $this->delete_file($residentialFile);
         }
+        Log::info('Fin de la importación de '.$import_type);
+        return json_encode(['message' => 'Fin de la importación']);
     }
 
     /**

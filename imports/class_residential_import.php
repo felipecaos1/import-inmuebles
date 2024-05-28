@@ -28,8 +28,6 @@ class ResidentialImport extends Import
         // $existing_post_id = $this->buscar_inmueble_por_id($data['id']);        
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
 
-        // funcion para crear un array con los id de las imagenes
-        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
 
         // Metacampos
         $meta_datos = array(
@@ -55,6 +53,9 @@ class ResidentialImport extends Import
             'is_mls' => true
         );
 
+        // funcion para crear un array con los id de las imagenes
+        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
+        
         if ($this->inmueble->post_created) {
             // Actualiza el post existente
 
@@ -91,7 +92,8 @@ class ResidentialImport extends Import
             if (!is_wp_error($updated)) {
                 // Log::info('Inmueble Actualizado');
             } else {
-                // Log::info('Error al actualizar el inmueble');
+                $error_message = $updated->get_error_message();
+                Log::info('Error al actualizar el inmueble: ' . $error_message);
             }
 
         } else {
@@ -100,7 +102,8 @@ class ResidentialImport extends Import
 
             $post_data = array(
                 'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
-                'post_status'   => 'publish', 
+                // 'post_status'   => 'publish', 
+                'post_status'   => 'pending',
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
             );
@@ -120,7 +123,8 @@ class ResidentialImport extends Import
                 }                
                 $this->update_by_unique_id($data['unique_id'],['post_created' => $post_id,'feature_img' => $result_feature_img]);
             } else {
-                // Log::info('Error al crear el inmueble');
+                $error_message = $updated->get_error_message();
+                Log::info('Error al crear el inmueble: ' . $error_message);
             }
         }
 

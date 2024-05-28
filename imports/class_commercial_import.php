@@ -19,6 +19,8 @@ class CommercialImport extends Import
      */
     public function crear_inmueble($data)
     {
+        // Log::info('Inmueble '.$data['unique_id']);
+        
         $key = array_search($data['unique_id'], array_column($this->data_result, 'unique_id'));
         if ($key !== false) {
             $this->inmueble = $this->data_result[$key];
@@ -94,9 +96,10 @@ class CommercialImport extends Import
             $updated = wp_update_post($post_data);
 
             if (!is_wp_error($updated)) {
-                // Log::info('Inmueble Actualizado');
+                Log::info('Inmueble Actualizado');
             } else {
-                // Log::info('Error al actualizar el inmueble');
+                $error_message = $updated->get_error_message();
+                Log::info('Error al actualizar el inmueble: ' . $error_message);
             }
 
         }else{
@@ -114,6 +117,7 @@ class CommercialImport extends Import
             $post_id = wp_insert_post($post_data);
 
             if (!is_wp_error($post_id)) {
+                Log::info('Inmueble Creado');
                 // Imagen destacada
                 $result_feature_img = $this->set_feature_img($post_id, $ruta_feature_img);
                 
@@ -126,7 +130,8 @@ class CommercialImport extends Import
                 }
                 $this->update_by_unique_id($data['unique_id'],['post_created' => $post_id,'feature_img' => $result_feature_img]);
             }else{
-                // Log::info('Error al crear el inmueble');
+                $error_message = $post_id->get_error_message();
+                Log::info('Error al crear el inmueble: ' . $error_message);
             }
         }
 
