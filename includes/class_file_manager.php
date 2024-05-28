@@ -42,7 +42,8 @@ class FileManager
      */
     public function load_all_zip($cant = 1)
     {
-        set_time_limit(600);    
+        set_time_limit(0);
+        ini_set('max_execution_time', 3600);    
         try {
             Log::info("Iniciando la importación de los archivos ZIP");
             
@@ -65,9 +66,9 @@ class FileManager
             }
     
             Log::info("La importación de los archivos ZIP fue exitosa");
-            Log::info("Total archivos = " . count($archivosZip) . " : numero peticion url = " . $cant);
+            Log::info("Total archivos = " . count($archivosParaProcesar) . " : numero peticion url = " . $cant);
             ftp_close($ftp);
-            return json_encode(['message' => 'La importación de los archivos ZIP fue exitosa', 'Total zips' =>$archivosZip]);
+            return json_encode(['message' => 'La importación de los archivos ZIP fue exitosa', 'Total zips' =>$archivosParaProcesar]);
     
         } catch (\Exception $e) {
             Log::error("Error durante la importación de los archivos ZIP: " . $e->getMessage());

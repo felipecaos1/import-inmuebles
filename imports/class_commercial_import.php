@@ -23,7 +23,7 @@ class CommercialImport extends Import
         if ($key !== false) {
             $this->inmueble = $this->data_result[$key];
         } else {
-            $this->inmueble = $this->insert_data_into_table($data['unique_id'],'residential');
+            $this->inmueble = $this->insert_data_into_table($data['unique_id'],'commercial');
         }
         
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
