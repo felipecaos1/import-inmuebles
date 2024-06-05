@@ -11,3 +11,46 @@ function wptuts_scripts_basic() {
 }
 
 add_action('admin_enqueue_scripts', 'wptuts_scripts_basic');
+
+// Función para cargar el script solo en los posts de tipo estate_property
+function enqueue_custom_script_for_properties() {
+    if (is_singular('estate_property')) {
+        $post_id = get_the_ID();//obtenemos el id del post
+
+        if($post_id){
+            wp_enqueue_script(
+                'set_img',
+                plugins_url('js/set_img.js', IMPORTMLS_FILE),
+                array('jquery'),
+                null,
+                true
+            );
+
+            $inmueble = get_by_unique_id($post_id);//
+            $post_galery_insert = explode(',', $inmueble->post_galery_insert);
+            wp_localize_script('set_img', 'MyPluginData', array(
+                'unique_id' => $inmueble->unique_id,//'0003C877'
+                'base_url' =>  plugins_url('/', IMPORTMLS_FILE).DIR_NAME_TEMP.'/',
+                'number_img' =>$post_galery_insert
+            ));
+            
+        }
+
+    }
+}
+add_action('wp_enqueue_scripts', 'enqueue_custom_script_for_properties');
+
+function get_by_unique_id($post_id) 
+{
+    global $wpdb;
+
+    $tabla_nombre = $wpdb->prefix . TABLE_NAME;
+
+    $resultado = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT * FROM $tabla_nombre WHERE post_created = %d", $post_id
+        )
+    );
+
+    return $resultado;
+}

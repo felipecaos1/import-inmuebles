@@ -41,11 +41,11 @@ class CommercialImport extends Import
         
         // Metacampos
         $meta_datos = array(
-            'valor' => $data['price_current'],
+            'property_price' => $data['price_current'],
             '_direccion' => $data['street_name_es'].', '.$data['map_area'].', '.$data['district'],
             'area-de-la-propiedad' => $data['lot_sqft'],
             'area-construida' => $data['sqft_total'],
-            'descripcion' => $data['remarks_es'],
+            // 'descripcion' => $data['remarks_es'],
             'estrato' => '',
             'id'=> $data['id'],
             'tiempo-construccion' => $this->calculate_built_time($data['year_built']),//Calcular sobre fecha
@@ -89,7 +89,8 @@ class CommercialImport extends Import
                 'ID'            => $post_id,
                 'post_title'    => $data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
                 // 'post_status'   => 'publish', 
-                'post_type'     => 'propiedades',
+                'post_type'     => 'estate_property',
+                'post_content'  => $data['remarks_es'],
                 'meta_input'    => $meta_datos 
             );
 
@@ -110,7 +111,8 @@ class CommercialImport extends Import
                 'post_title'    =>$data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '. $data['id'],
                 // 'post_status'   => 'publish', 
                 'post_status'   => 'pending', 
-                'post_type'     => 'propiedades',
+                'post_type'     => 'estate_property',
+                'post_content'  => $data['remarks_es'],
                 'meta_input'    => $meta_datos 
             );        
             // Crea un nuevo post

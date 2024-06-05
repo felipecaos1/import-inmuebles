@@ -64,28 +64,35 @@ class Import
      * @param string $term Nombre de la term a asignar.
      * @return true|WP_Error Retorna true si la asignación fue exitosa, o un objeto WP_Error si hubo un error.
      */
-    protected function set_taxonomia($post_id, $target, $tax ) 
+    protected function set_taxonomia($post_id, $targets, $tax ) 
     {
-        if (empty($post_id) || !is_int($post_id) || empty($target)) {
+        if (empty($post_id) || !is_int($post_id) || empty($targets) || !is_array($targets)) {
             return new WP_Error('invalid_input', 'Input values are invalid.');
         }
-        $term = term_exists($target, $tax);
-        
-        // Si el término no existe, créalo
-        if (!$term) {
-            $term = wp_insert_term($target, $tax);
-            // Verificar si hubo un error al crear el término
-            if (is_wp_error($term)) {
-                return $term;
+
+        $term_ids = [];
+
+        foreach ($targets as $target) {
+
+            $term = term_exists($target, $tax);
+            
+            // Si el término no existe, créalo
+            if (!$term) {
+                $term = wp_insert_term($target, $tax);
+                // Verificar si hubo un error al crear el término
+                if (is_wp_error($term)) {
+                    return $term;
+                }
             }
         }
 
         // Obtener el ID del término
         $term_id = is_array($term) ? $term['term_id'] : $term;
         $term_id = (int) $term_id;
+        $term_ids[] = $term_id;
         
-        // Asigna el término al post utilizando el ID
-        $result = wp_set_object_terms($post_id, $term_id , $tax, false);
+         // Asigna los términos al post utilizando los IDs
+        $result = wp_set_object_terms($post_id, $term_ids, $tax, false);
         if (is_wp_error($result)) {
             return $result; // Retornar el error para manejo externo
         }
@@ -104,8 +111,8 @@ class Import
     protected function get_post_galery_ids($id_unique, $multi_count, $post_galery_insert)
     {
         $list_ids = [];
-        $save_post_galery_insert = true;
-        $cont_porcess = 1;
+        $string_post_galery = $post_galery_insert; //"2,3,4,5" || ""
+
 
         if (!empty($post_galery_insert)) {
             $post_galery_insert = explode(',', $post_galery_insert); // Arreglo con los datos convertidos
@@ -117,19 +124,14 @@ class Import
 
         for ($i=2; $i <= $multi_count ; $i++) {            
             if($count_galery_insert >= ($multi_count - 1)){ // Verifico si cantidad de de imagenes insertadas es mayor o igual a las que se van a procesar, pare el proceso
-                $save_post_galery_insert = false;
                 break;
             }
-            if($count_galery_insert >= 6){ //Validar que tengan N catidad o menos en la base de datos, si las tiene para el bucle
-                break;
-            }
+
             if(!in_array($i,$post_galery_insert)){ //Se valida que solo ingrese los que no esten en el resultado de la base de datos 
-                if($cont_porcess > 2){ //Solo permitir N proceso para cargue de las imagenes
-                    break;
-                }
                 $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
                 $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
                 if ( file_exists( $ruta_img ) ){
+                    $imagen_id = get_option('id_preview');
                     if($i === 2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
                         $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
                         $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
@@ -138,15 +140,20 @@ class Import
                         }else{
                             $ruta_img = $destination_path;
                         }
+                        $imagen_id = $this->load_image_and_get_id($ruta_img);
+                            
                     }
-                    $imagen_id = $this->load_image_and_get_id($ruta_img);
                     if ($imagen_id) {
                         $list_ids[]= $imagen_id;
-                        $post_galery_insert[]= $i; //Agregamos el valor de $i al arreglo
-                    } else {
+                        if(!empty($string_post_galery)){
+                            $string_post_galery .=','.$i;
+                        }else{
+                            $string_post_galery .= $i;
+                        }
+                        
+                    }else {
                         // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
                     }
-                    $cont_porcess ++;
                 }else{
                     // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
                 }
@@ -154,16 +161,77 @@ class Import
 
         }
         
-        if($save_post_galery_insert){
-            $post_galery_insert = implode(',', $post_galery_insert );//Lo convertimos en cadena nuevamente para poderlo guardar en la base de datos
-            $this->update_by_unique_id($id_unique,['post_galery_insert' => $post_galery_insert]);
-        }
+        $this->update_by_unique_id($id_unique,['post_galery_insert' => $string_post_galery]);
+        
 
         $str_ids = implode(',', $list_ids );
 
         return $str_ids;
     }
 
+    // protected function get_post_galery_ids($id_unique, $multi_count, $post_galery_insert)
+    // {
+    //     $list_ids = [];
+    //     $save_post_galery_insert = true;
+    //     $cont_porcess = 1;
+
+    //     if (!empty($post_galery_insert)) {
+    //         $post_galery_insert = explode(',', $post_galery_insert); // Arreglo con los datos convertidos
+    //     }else{
+    //         $post_galery_insert = [];
+    //     }
+
+    //     $count_galery_insert = count($post_galery_insert);
+
+    //     for ($i=2; $i <= $multi_count ; $i++) {            
+    //         if($count_galery_insert >= ($multi_count - 1)){ // Verifico si cantidad de de imagenes insertadas es mayor o igual a las que se van a procesar, pare el proceso
+    //             $save_post_galery_insert = false;
+    //             break;
+    //         }
+    //         if($count_galery_insert >= 6){ //Validar que tengan N catidad o menos en la base de datos, si las tiene para el bucle
+    //             break;
+    //         }
+    //         if(!in_array($i,$post_galery_insert)){ //Se valida que solo ingrese los que no esten en el resultado de la base de datos 
+    //             if($cont_porcess > 2){ //Solo permitir N proceso para cargue de las imagenes
+    //                 break;
+    //             }
+    //             $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
+    //             $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
+    //             if ( file_exists( $ruta_img ) ){
+    //                 $imagen_id = get_option('id_preview');
+    //                 if($i === 2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
+    //                     $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
+    //                     $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
+    //                     if (is_wp_error($result)) {
+    //                         Log::error('Hubo un error al convertir la imagen '.$id_unique.$ext);
+    //                     }else{
+    //                         $ruta_img = $destination_path;
+    //                     }
+    //                     $imagen_id = $this->load_image_and_get_id($ruta_img);
+    //                 }
+    //                 if ($imagen_id) {
+    //                     $list_ids[]= $imagen_id;
+    //                     $post_galery_insert[]= $i; //Agregamos el valor de $i al arreglo
+    //                 } else {
+    //                     // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
+    //                 }
+    //                 $cont_porcess ++;
+    //             }else{
+    //                 // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
+    //             }
+    //         }
+
+    //     }
+        
+    //     if($save_post_galery_insert){
+    //         $post_galery_insert = implode(',', $post_galery_insert );//Lo convertimos en cadena nuevamente para poderlo guardar en la base de datos
+    //         $this->update_by_unique_id($id_unique,['post_galery_insert' => $post_galery_insert]);
+    //     }
+
+    //     $str_ids = implode(',', $list_ids );
+
+    //     return $str_ids;
+    // }
     /**
      * Carga una imagen desde una URL y obtiene su ID en la biblioteca de medios de WordPress.
      *
@@ -227,9 +295,9 @@ class Import
         });
 
         // Crear un array asociativo donde cada elemento tiene el valor 'true'
-        $array_resultado = array_fill_keys($elementos, 'true');
+        // $array_resultado = array_fill_keys($elementos, 'true');
      
-        return $array_resultado;
+        return $elementos;
     }
 
      /**
@@ -239,42 +307,42 @@ class Import
      * @return string retorne una cadena con el tipo de propiedad equivalente 
      */
 
-    protected function get_property_type($property_type)
-    {
-        $property_type = strtolower($property_type);
-        switch ($property_type) {
-            case 'apartamento':
-                return 'Apartamentos';
-                break;
-            case 'lote residencial':
-                return 'Lotes';
-                break;
-            case 'casa':
-                return 'Casas';
-                break;
-            case 'finca recreativa':
-                return 'Fincas';
-                break;
-            case 'rural':
-                return 'Fincas';
-                break;
-            case 'oficina':
-                return 'Oficinas';
-                break;
-            case 'finca productiva':
-                return 'Fincas';
-                break;
-            case 'bodega':
-                return 'Bodegas';
-                break;
-            case 'lote comercial':
-                return 'Lotes';
-                break;
-            default:
-                return  ucwords($property_type);
-                break;
-        }
-    }
+    // protected function get_property_type($property_type)
+    // {
+    //     $property_type = strtolower($property_type);
+    //     switch ($property_type) {
+    //         // case 'apartamento':
+    //         //     return 'Apartamentos';
+    //         //     break;
+    //         case 'lote residencial':
+    //             return 'Lotes';
+    //             break;
+    //         // case 'casa':
+    //         //     return 'Casas';
+    //         //     break;
+    //         case 'finca recreativa':
+    //             return 'Fincas';
+    //             break;
+    //         case 'rural':
+    //             return 'Fincas';
+    //             break;
+    //         case 'oficina':
+    //             return 'Oficinas';
+    //             break;
+    //         case 'finca productiva':
+    //             return 'Fincas';
+    //             break;
+    //         case 'bodega':
+    //             return 'Bodegas';
+    //             break;
+    //         case 'lote comercial':
+    //             return 'Lotes';
+    //             break;
+    //         default:
+    //             return  ucwords($property_type);
+    //             break;
+    //     }
+    // }
 
     /**
      * Convierte una imagen a formato JPEG y la guarda en el destino especificado.
