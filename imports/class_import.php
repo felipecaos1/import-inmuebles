@@ -97,7 +97,6 @@ class Import
             return $result; // Retornar el error para manejo externo
         }
     
-        // Log::info('Se establecio la taxonomia: '. $tax);
         return true;
     }
     
@@ -127,11 +126,14 @@ class Import
                 break;
             }
 
+            //if($cont_porcess > 2){break;}
+
             if(!in_array($i,$post_galery_insert)){ //Se valida que solo ingrese los que no esten en el resultado de la base de datos 
                 $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
                 $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
                 if ( file_exists( $ruta_img ) ){
                     $imagen_id = get_option('id_preview');
+
                     if($i === 2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
                         $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
                         $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
@@ -140,9 +142,9 @@ class Import
                         }else{
                             $ruta_img = $destination_path;
                         }
-                        $imagen_id = $this->load_image_and_get_id($ruta_img);
-                            
+                        $imagen_id = $this->load_image_and_get_id($ruta_img);                            
                     }
+
                     if ($imagen_id) {
                         $list_ids[]= $imagen_id;
                         if(!empty($string_post_galery)){
@@ -275,6 +277,7 @@ class Import
 
     //     return $str_ids;
     // }
+
     /**
      * Carga una imagen desde una URL y obtiene su ID en la biblioteca de medios de WordPress.
      *
@@ -458,13 +461,13 @@ class Import
         global $wpdb;
     
         $tabla_nombre = $wpdb->prefix . TABLE_NAME;
-    
-        $resultado = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT * FROM $tabla_nombre WHERE unique_id = %d", $unique_id
-            )
-        );
-    
+        
+        // Prepara la consulta con un marcador de posición.
+        $consulta_preparada = $wpdb->prepare("SELECT * FROM $tabla_nombre WHERE unique_id = %s", $unique_id);
+        
+        // Ejecuta la consulta preparada.
+        $resultado = $wpdb->get_row($consulta_preparada);
+        
         return $resultado;
     }
 
