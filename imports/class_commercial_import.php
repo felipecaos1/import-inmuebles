@@ -4,12 +4,10 @@ require_once IMPORTMLS_DIR . 'imports/class_import.php';
 
 class CommercialImport extends Import
 {
-    private $data_result;
     private $inmueble;
     
 
-    public function __construct($data_result = []) {
-        $this->data_result = $data_result;
+    public function __construct() {
     }
 
     /**
@@ -21,17 +19,13 @@ class CommercialImport extends Import
     {
         // Log::info('Inmueble '.$data['unique_id']);
         
-        $key = array_search($data['unique_id'], array_column($this->data_result, 'unique_id'));
-        if ($key !== false) {
-            $this->inmueble = $this->data_result[$key];
-        } else {
+        $this->inmueble = $this->get_by_unique_id($data['unique_id']);
+        if(!$this->inmueble) {
             $this->inmueble = $this->insert_data_into_table($data['unique_id'],'commercial');
         }
         
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
-        // funcion para crear un array con los id de las imagenes
-        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
-
+        
         // - street_name_es no llega
         $data['street_name_es'] = '';
         // - bedrooms no llega
@@ -62,6 +56,9 @@ class CommercialImport extends Import
             'urbanizacion' =>($data['subdivision'] !='No aplica')? $data['subdivision']:'',
             'is_mls' => true
         );
+
+        // funcion para crear un array con los id de las imagenes
+        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
 
         if ($this->inmueble->post_created) {
             // Actualiza el post existente

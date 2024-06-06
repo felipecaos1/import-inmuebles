@@ -4,11 +4,10 @@ require_once IMPORTMLS_DIR . 'imports/class_import.php';
 
 class ResidentialImport extends Import
 {
-    private $data_result;
     private $inmueble;
     
-    public function __construct($data_result = []) {
-        $this->data_result = $data_result;
+    public function __construct() {
+        
     }
 
     /**
@@ -18,12 +17,10 @@ class ResidentialImport extends Import
      */
     public function crear_inmueble($data)
     {
-        // $key = array_search($data['unique_id'], array_column($this->data_result, 'unique_id'));
-        // if ($key !== false) {
-        //     $this->inmueble = $this->data_result[$key];
-        // } else {
-        //     $this->inmueble = $this->insert_data_into_table($data['unique_id'],'residential');
-        // }
+        $this->inmueble = $this->get_by_unique_id($data['unique_id']);
+        if(!$this->inmueble) {
+            $this->inmueble = $this->insert_data_into_table($data['unique_id'],'residential');
+        }
         
         // $existing_post_id = $this->buscar_inmueble_por_id($data['id']);        
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
@@ -134,7 +131,7 @@ class ResidentialImport extends Import
                 }                
                 $this->update_by_unique_id($data['unique_id'],['post_created' => $post_id,'feature_img' => $result_feature_img]);
             } else {
-                $error_message = $updated->get_error_message();
+                $error_message = $post_id->get_error_message();
                 Log::info('Error al crear el inmueble: ' . $error_message);
             }
         }

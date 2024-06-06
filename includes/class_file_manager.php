@@ -82,7 +82,7 @@ class FileManager
      * @param string $import_type tipo de importación a realizar
      * @param string|null $date Fecha en formato 'Ymd' de la que se importarán los archivos. Si es nulo, se usa la fecha actual.
      */
-    public function import($import_type,$date = '20240522')
+    public function import( $import_type , $date = '20240522')
     {
         set_time_limit(0);
         
@@ -119,6 +119,9 @@ class FileManager
             //Procesar Residencial
             $this->import_file($residentialFile,'residential');
             $this->delete_file($residentialFile);
+        }else if($import_type == 'execute_clear'){
+            init_delete_img_scaled();
+            exit;
         }
         Log::info('Fin de la importación de '.$import_type);
         return json_encode(['message' => 'Fin de la importación']);
@@ -167,20 +170,14 @@ class FileManager
      */
     private function import_file($name_file,$import_type)
     {
-        if($import_type == 'residential'){
-            $res = new ResidentialImport();
-            $data = $res->get_data_by_import_type($import_type);
-            
-            if(Csv::import(new ResidentialImport($data),DIR_NAME_TEMP.'/'.$name_file)){
+        if($import_type == 'residential'){            
+            if(Csv::import(new ResidentialImport(),DIR_NAME_TEMP.'/'.$name_file)){
                 update_option('import_res', true);
             }else{
                 update_option('import_res', false);
             }
         }elseif($import_type == 'commercial'){ 
-            $com = new CommercialImport();
-            $data = $com->get_data_by_import_type($import_type);
-
-            if(Csv::import(new CommercialImport($data),DIR_NAME_TEMP.'/'.$name_file)){
+            if(Csv::import(new CommercialImport(),DIR_NAME_TEMP.'/'.$name_file)){
                 update_option('import_com', true);
             }else{
                 update_option('import_com', false);

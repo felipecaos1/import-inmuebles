@@ -63,24 +63,44 @@ function attachment_ids_by_filename($filenames) {
     return $wpdb->get_col($query);
 }
 
-// Ejemplo de uso: Eliminar versiones escaladas de una imagen específica por nombre de archivo
-function init_delete_img_scaled($import_type) {
-    set_time_limit(0);
-    $res = new ResidentialImport();
-    $data = $res->get_data_by_import_type($import_type);
+    /**
+     * Inicializa el proceso de eliminación de imágenes escaladas.
+     * Este proceso elimina imágenes escaladas según un rango específico definido por un contador.
+     * El contador se utiliza para controlar la ejecución de la función.
+     *
+     * @return void
+     */
+    function init_delete_img_scaled() 
+    {
+        // Establecer el límite de tiempo de ejecución a infinito para evitar que la función se detenga prematuramente.
+        set_time_limit(0);
+        
+         // Crear una instancia de la clase ResidentialImport para obtener los datos según el tipo de importación.
+        $res = new ResidentialImport();
+        $data_res = $res->get_data_by_import_type('residential');
+        $data_com = $res->get_data_by_import_type('commercial');
+        
+        // Inicializar un contador para realizar un seguimiento del número de iteraciones.
+        $count_res = 0;        
 
-    // dump_json(count($data),$data);
-    // $com = new CommercialImport();
-    // $data = $com->get_data_by_import_type($import_type);
-    $count = 0;
-    foreach($data as $inmueble){
-
-        if($count > 5000 && $count <= 6000){
-          delete_scaled_images_by_filename([$inmueble->unique_id,$inmueble->unique_id.'-L02']);
+        // Iterar sobre los datos obtenidos.
+        foreach($data_res as $inmueble){
+            delete_scaled_images_by_filename([$inmueble->unique_id,$inmueble->unique_id.'-L02']);
+            // Incrementar el contador de iteración.         
+            $count_res ++;
         }
-          
-     $count++;
+
+        // Inicializar un contador para realizar un seguimiento del número de iteraciones.
+        $count_com = 0;        
+
+        // Iterar sobre los datos obtenidos.
+        foreach($data_com as $inmueble){
+            delete_scaled_images_by_filename([$inmueble->unique_id,$inmueble->unique_id.'-L02']);
+            // Incrementar el contador de iteración.         
+            $count_com ++;
+        }
+
+        Log::info("Inmuebles procesados",['residential' => $count_res, 'commercial' => $count_com]);
     }
-}
 
 ?>
