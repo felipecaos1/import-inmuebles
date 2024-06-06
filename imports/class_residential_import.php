@@ -18,12 +18,12 @@ class ResidentialImport extends Import
      */
     public function crear_inmueble($data)
     {
-        $key = array_search($data['unique_id'], array_column($this->data_result, 'unique_id'));
-        if ($key !== false) {
-            $this->inmueble = $this->data_result[$key];
-        } else {
-            $this->inmueble = $this->insert_data_into_table($data['unique_id'],'residential');
-        }
+        // $key = array_search($data['unique_id'], array_column($this->data_result, 'unique_id'));
+        // if ($key !== false) {
+        //     $this->inmueble = $this->data_result[$key];
+        // } else {
+        //     $this->inmueble = $this->insert_data_into_table($data['unique_id'],'residential');
+        // }
         
         // $existing_post_id = $this->buscar_inmueble_por_id($data['id']);        
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
@@ -44,20 +44,17 @@ class ResidentialImport extends Import
             'property_agent' =>'24509',//id agente encargado
             '_direccion' => $data['street_name_es'].', '.$data['map_area'].', '.$data['district'],
             '_yoast_wpseo_metadesc'=>'🏙️ Area m2: '.$data['sqft_total'].' m2 - ▶️ Valor: $'.$data['price_current'].' - 🛏️ Habitaciones: '.$data['bedrooms'].' - 🚘 Parq: '.$data['parking_spaces'],
+            'm2-construidos' =>$this->rangoMcuadrados($data['sqft_total']),
+            'tamano-de-lote' =>$this->rangoMLote($data['lot_sqft']),
             
             // No usadas, pero importantes
-            'm2-construidos' =>'',
             'property_latitude' =>'',//laitud de la propiedad 
             'property_longitude' =>'',//longitud de la propiedad
-            'page_custom_zoom' =>'15',//zoom del mapa
-            'property_country' =>'Colombia',//zoom del mapa
+            'property_country' =>'Colombia',
             'predial'=>'',
             'administracion'=>'',
             // -------------------------
             
-            // 'descripcion' => $data['remarks_es'],
-            // 'tiempo-construccion' => $this->calculate_built_time($data['year_built']),//Calcular sobre fecha
-            // 'comodidades' => $this->get_amenities($data['interior_features'].','.$data['exterior_features']),
             'sector' => array(
                 $data['map_area'] => 'true'
             ),

@@ -169,6 +169,49 @@ class Import
         return $str_ids;
     }
 
+    /**
+     * Devuelve el rango en el que se encuentra los metros cuadrados construidos.
+     *
+     * @param int $numero metros cuadrados construídos.
+     * @return string Retorna un string que indica el rango en donde se encuentra
+     */
+
+    protected function rangoMcuadrados($numero) {
+        if ($numero < 100) {
+            return "Menos de 100 m2";
+        } elseif ($numero >= 100 && $numero <= 150) {
+            return "100 - 150 m2";
+        } elseif ($numero > 150 && $numero <= 250) {
+            return "150 - 250 m2";
+        } elseif ($numero > 250 && $numero <= 350) {
+            return "250 - 350 m2";
+        } else {
+            return "Más de 350 m2";
+        }
+    }
+
+     /**
+     * Devuelve el rango en el que se encuentra los metros totales del lote.
+     *
+     * @param int $numero metros cuadrados del lote.
+     * @return string Retorna un string que indica el rango en donde se encuentra
+     */
+
+     protected function rangoMLote($numero) {
+        if ($numero < 500) {
+            return "Menos de 500m2";
+        } elseif ($numero >= 500 && $numero <= 1000) {
+            return "500 - 1.000 m2";
+        } elseif ($numero > 1000 && $numero <= 1500) {
+            return "1.000 - 1.500 m2";
+        } elseif ($numero > 1500 && $numero <= 3000) {
+            return "1.500 - 3.000 m2";
+        } else {
+            return "Más de 3.000 m2";
+        }
+    }
+
+
     // protected function get_post_galery_ids($id_unique, $multi_count, $post_galery_insert)
     // {
     //     $list_ids = [];
