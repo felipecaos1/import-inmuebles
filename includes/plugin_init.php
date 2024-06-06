@@ -136,10 +136,10 @@ function dump_json(...$vars): void
  * Esta función verifica si el parámetro 'batch_zip' está presente en la URL. Si el parámetro existe y 
  * su valor es un número válido, se crea una instancia de la clase FileManager y se llama al método 
  * load_all_zip con el valor del lote. Si el lote no es válido, se muestra un mensaje de error.
- * Url : http://alterna.test/?batch_zip=1
- * Url : http://alterna.test/?import=commercial    &date=20240314
- * Url : http://alterna.test/?import=residential   &date=20240314
- * Url : http://alterna.test/?import=zip           &date=20240314
+ * Url : http://propiedadesnakama.test/?batch_zip=1
+ * Url : http://propiedadesnakama.test/?import=commercial    &date=20240314
+ * Url : http://propiedadesnakama.test/?import=residential   &date=20240314
+ * Url : http://propiedadesnakama.test/?import=zip           &date=20240314
  * @return void
  */
 function custom_plugin_process_url() 
