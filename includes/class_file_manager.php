@@ -82,15 +82,15 @@ class FileManager
      * @param string $import_type tipo de importación a realizar
      * @param string|null $date Fecha en formato 'Ymd' de la que se importarán los archivos. Si es nulo, se usa la fecha actual.
      */
-    public function import( $import_type , $date = '20240522')
+    public function import( $import_type , $date = null)
     {
         set_time_limit(0);
         
         Log::info('Inicia la importación de '.$import_type);
 
         if($date == null){
-            // $date = date('Ymd');
-            $date = '20240522';
+            $date = date('Ymd');
+            // $date = '20240522';
         }
 
         $residentialFile = "/res{$date}.csv";

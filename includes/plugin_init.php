@@ -161,6 +161,7 @@ function custom_plugin_process_url()
     }
     
     if (isset($_GET['import'])) {
+      
         $import_type = $_GET['import'];
         $date = isset($_GET['date']) ? $_GET['date'] : null;
         if ($import_type != '') {
@@ -168,6 +169,9 @@ function custom_plugin_process_url()
             // $file_manager->import($import_type,$date);
             // init_delete_img_scaled($import_type);
             // exit;
+
+            echo $import_type;
+            exit;
             
             $script_path = IMPORTMLS_DIR . 'includes/load_scripts_php.php';
             $command = "php {$script_path} import={$import_type}&date={$date} > /dev/null 2>&1 &";

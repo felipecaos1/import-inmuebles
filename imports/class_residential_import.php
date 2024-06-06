@@ -45,8 +45,9 @@ class ResidentialImport extends Import
             'tamano-de-lote' =>$this->rangoMLote($data['lot_sqft']),
             
             // No usadas, pero importantes
-            'property_latitude' =>'',//laitud de la propiedad 
-            'property_longitude' =>'',//longitud de la propiedad
+            'property_latitude' =>$data['latitude'],//laitud de la propiedad 
+            'property_longitude' =>$data['longitude'],//longitud de la propiedad
+
             'property_country' =>'Colombia',
             'predial'=>'',
             'administracion'=>'',
@@ -138,21 +139,23 @@ class ResidentialImport extends Import
 
         // Verificar si hay un post 
         if ($post_id) {
-            // Taxonomias
+                // Taxonomias
             // property_category: single: casa-apto,etc
             $this->set_taxonomia($post_id, [$data['property_type']], 'property_category');
             // property_action_category: single: compra-venta-nodisponible, se asigna por defecto Venta(id=51)
             wp_set_object_terms($post_id, 51 , 'property_action_category', false);
             // property_city: ciudades agrupadas
+            $this->set_taxonomia($post_id, [$data['district']], 'property_city');
             // property_area: Barrio
-            // $this->set_taxonomia($post_id, [$data['map_area']], 'property_area');
+            $this->set_taxonomia($post_id, [$data['map_area']], 'property_area');
             // property_county_state: "Medellín – Colombia"
-            $this->set_taxonomia($post_id, [$data['district'].' - Colombia'], 'property_county_state');
+            $this->set_taxonomia($post_id, ['Colombia'], 'property_county_state');
             // property_features: amenities
             $this->set_taxonomia($post_id, $this->get_amenities($data['interior_features'].','.$data['exterior_features']), 'property_features');
             
             // property_status: vacio
             $this->set_taxonomia($post_id, [$data['remodelled']], 'property_status');
+
 
         } else {
             Log::error('Error, no hay un id para establecer las taxonomias');
