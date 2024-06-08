@@ -53,10 +53,6 @@ class ResidentialImport extends Import
             'administracion'=>'',
             // -------------------------
             
-            'sector' => array(
-                $data['map_area'] => 'true'
-            ),
-            
             'is_mls' => true
         );
 
@@ -139,7 +135,8 @@ class ResidentialImport extends Import
 
         // Verificar si hay un post 
         if ($post_id) {
-                // Taxonomias
+            
+            // Taxonomias
             // property_category: single: casa-apto,etc
             $this->set_taxonomia($post_id, [$data['property_type']], 'property_category');
             // property_action_category: single: compra-venta-nodisponible, se asigna por defecto Venta(id=51)
@@ -149,15 +146,15 @@ class ResidentialImport extends Import
             // property_area: Barrio
             $this->set_taxonomia($post_id, [$data['map_area']], 'property_area');
             // property_county_state: "Medellín – Colombia"
-            $this->set_taxonomia($post_id, ['Colombia'], 'property_county_state');
+            $this->set_taxonomia($post_id, ['Colombia'], 'property_county_state');//optimizar
             // property_features: amenities
+            // var_dump($this->get_amenities($data['interior_features'].','.$data['exterior_features']));
             $this->set_taxonomia($post_id, $this->get_amenities($data['interior_features'].','.$data['exterior_features']), 'property_features');
             
             // property_status: vacio
             $this->set_taxonomia($post_id, [$data['remodelled']], 'property_status');
 
-
-        } else {
+            } else {
             Log::error('Error, no hay un id para establecer las taxonomias');
         }        
     }

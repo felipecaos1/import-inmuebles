@@ -66,12 +66,26 @@ class Import
      */
     protected function set_taxonomia($post_id, $targets, $tax ) 
     {
-        if (empty($post_id) || !is_int($post_id) || empty($targets) || !is_array($targets)) {
+        // if ( !is_int($post_id) || empty($post_id) || empty($targets) ) {
+            
+        //     if($tax=='property_features')
+        //     {
+        //         echo count($targets);
+        //         echo $post_id;
+        //         var_dump($targets);
+        //     }
+        //     return new WP_Error('invalid_input', 'Input values are invalid.');
+            
+        // }
+        
+        if (empty($post_id)  || empty($targets) || !is_array($targets)) {
+            
             return new WP_Error('invalid_input', 'Input values are invalid.');
+            
         }
-
+            
         $term_ids = [];
-
+        
         foreach ($targets as $target) {
 
             $term = term_exists($target, $tax);
@@ -84,19 +98,28 @@ class Import
                     return $term;
                 }
             }
-        }
-
+        
         // Obtener el ID del término
         $term_id = is_array($term) ? $term['term_id'] : $term;
         $term_id = (int) $term_id;
         $term_ids[] = $term_id;
+        // echo $term_id;
+        // Log::info('comodidades', $term_id);
+
+        }
+       
+            
+        // var_dump($term_ids);
         
-         // Asigna los términos al post utilizando los IDs
-        $result = wp_set_object_terms($post_id, $term_ids, $tax, false);
+        
+        // Asigna los términos al post utilizando los IDs
+        $result = wp_set_object_terms($post_id, $term_ids , $tax, false);
         if (is_wp_error($result)) {
+            
             return $result; // Retornar el error para manejo externo
         }
-    
+        
+
         return true;
     }
     
@@ -342,7 +365,7 @@ class Import
 
         // Crear un array asociativo donde cada elemento tiene el valor 'true'
         // $array_resultado = array_fill_keys($elementos, 'true');
-     
+        
         return $elementos;
     }
 
