@@ -31,3 +31,18 @@ require IMPORTMLS_DIR . 'includes/plugin_init.php';
 
 
 
+function exclude_custom_attachments_from_media_library($query) {
+    if (!is_admin() ||  $query->get('post_type') !== 'attachment') {
+        return;
+    }
+
+    $meta_query = array(
+        array(
+            'key' => '_exclude_from_media_library',
+            'compare' => 'NOT EXISTS',
+        ),
+    );
+
+    $query->set('meta_query', $meta_query);
+}
+add_action('pre_get_posts', 'exclude_custom_attachments_from_media_library');

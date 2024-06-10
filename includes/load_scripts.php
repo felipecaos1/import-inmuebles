@@ -23,7 +23,7 @@ function enqueue_custom_script_for_properties() {
                 plugins_url('js/set_img.js', IMPORTMLS_FILE),
                 array('jquery'),
                 null,
-                true
+                false
             );
 
             $inmueble = get_by_unique_id($post_id);//

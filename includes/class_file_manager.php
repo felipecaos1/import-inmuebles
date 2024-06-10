@@ -102,13 +102,13 @@ class FileManager
             $ftp = $this->my_ftp_connect();
             ftp_pasv($ftp, true);
             //descargar archivos
-            // $this->download_file($zip,DIR_NAME_TEMP, $ftp);
+            $this->download_file($zip,DIR_NAME_TEMP, $ftp);
             // $this->download_file($commercialFile,DIR_NAME_TEMP, $ftp);
             $this->download_file($residentialFile,DIR_NAME_TEMP, $ftp);        
     
             // Procesar Zip
-            // $this->import_file($zip,'zip');
-            // $this->delete_file($zip);
+            $this->import_file($zip,'zip');
+            $this->delete_file($zip);
             ftp_close($ftp);
 
         }else if($import_type == 'commercial'){

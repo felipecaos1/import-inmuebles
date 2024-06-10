@@ -25,7 +25,7 @@ class ResidentialImport extends Import
         // $existing_post_id = $this->buscar_inmueble_por_id($data['id']);        
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
 
-        $urba = ($data['subdivision'] !='No aplica')? $data['subdivision']:'';//urbanización
+        // $urba = ($data['subdivision'] !='No aplica')? $data['subdivision']:'';//urbanización
         // Metacampos
         $meta_datos = array(
             'property_price' => $data['price_current']/1000000, //precio en millones
@@ -43,14 +43,26 @@ class ResidentialImport extends Import
             '_yoast_wpseo_metadesc'=>'🏙️ Area m2: '.$data['sqft_total'].' m2 - ▶️ Valor: $'.$data['price_current'].' - 🛏️ Habitaciones: '.$data['bedrooms'].' - 🚘 Parq: '.$data['parking_spaces'],
             'm2-construidos' =>$this->rangoMcuadrados($data['sqft_total']),
             'tamano-de-lote' =>$this->rangoMLote($data['lot_sqft']),
-            
-            // No usadas, pero importantes
+            'prop_featured' => '0',
             'property_latitude' =>$data['latitude'],//laitud de la propiedad 
             'property_longitude' =>$data['longitude'],//longitud de la propiedad
-
             'property_country' =>'Colombia',
-            'predial'=>'',
-            'administracion'=>'',
+            'administracion'=>$data['monthly_assessment'],
+            // 'page_show_adv_search'=>'global',
+            'page_use_float_search'=>'global',
+            
+
+            // 'topbar_transparent'=>'global',
+            // 'topbar_border_transparent'=>'global',
+            // 'sidebar_agent_option'=>'global',
+            // 'local_pgpr_slider_type'=>'global',
+            // 'local_pgpr_content_type'=>'global',
+            // 'header_transparent'=>'global',
+            // 'page_header_image_full_screen'=> 'yes',
+            // 'page_header_image_back_type'=> 'cover',
+            // 'post_show_title'=>'yes',
+            // 'sidebar_option' =>'right',
+            // 'sidebar_select' => 'primary-widget-area',
             // -------------------------
             
             'is_mls' => true
@@ -71,16 +83,16 @@ class ResidentialImport extends Import
                 }
             }
 
-            if($gallery_ids != '' ){
-                $new_gallery='';
-                $old_gallery = get_post_meta($post_id, 'galeria-de-imagenes', true);
-                if($old_gallery != '' ){
-                    $new_gallery .= $old_gallery.',';
-                }
-                $new_gallery .= $gallery_ids;
+            // if($gallery_ids != '' ){
+            //     $new_gallery='';
+            //     $old_gallery = get_post_meta($post_id, 'galeria-de-imagenes', true);
+            //     if($old_gallery != '' ){
+            //         $new_gallery .= $old_gallery.',';
+            //     }
+            //     $new_gallery .= $gallery_ids;
 
-                $meta_datos['image_to_attach'] =  $new_gallery;
-            }
+            //     $meta_datos['image_to_attach'] =  $new_gallery;
+            // }
             
             $post_data = array(
                 'ID'            => $post_id,
@@ -102,8 +114,8 @@ class ResidentialImport extends Import
 
         } else {
             
-            $meta_datos['image_to_attach'] =  $gallery_ids;
-
+            // $meta_datos['image_to_attach'] =  $gallery_ids;
+         
             $post_data = array(
                 'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
                 // 'post_status'   => 'publish', 
@@ -120,12 +132,12 @@ class ResidentialImport extends Import
                 $result_feature_img = $this->set_feature_img($post_id, $ruta_feature_img);
 
                 // Validar si se establecio la imagen destacada
-                if (!$result_feature_img) {
-                    if(get_option('id_preview')){
-                        $imagen_id = get_option('id_preview');
-                        $result_thumb = set_post_thumbnail($post_id, $imagen_id);
-                    }
-                }                
+                // if (!$result_feature_img) {
+                //     if(get_option('id_preview')){
+                //         $imagen_id = get_option('id_preview');
+                //         $result_thumb = set_post_thumbnail($post_id, $imagen_id);
+                //     }
+                // }                
                 $this->update_by_unique_id($data['unique_id'],['post_created' => $post_id,'feature_img' => $result_feature_img]);
             } else {
                 $error_message = $post_id->get_error_message();
