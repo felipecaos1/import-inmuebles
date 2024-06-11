@@ -16,6 +16,15 @@ jQuery(document).ready(function($) {
                 <div class="img_listings_overlay"></div>
                 </div>
                 `;
+
+                if(index == 4){
+                    var newDivHTML = `
+                    <div class="col-md-4 image_gallery lightbox_trigger special_border_top" data-slider-no="${index+2}" style="background-image:url('${base_url+unique_id+ext}')">
+                    <div class="img_listings_overlay img_listings_overlay_last"></div>
+                    <span class="img_listings_mes">Ver todo ${number_img.length} fotos</span>
+                    </div>
+                    `;
+                }
                 
                 $(galleryDiv).append(newDivHTML);
 
@@ -66,7 +75,7 @@ jQuery(document).ready(function($) {
                 }
 
                 $('.custome-lightbox_trigger').click(function(){
-                    console.log($(this).data('slider-no'));
+                    // console.log($(this).data('slider-no'));
                     var slide = $(this).data('slider-no');
                     $carousel.trigger('to.owl.carousel', [slide-1, 0]);
                     $('.lightbox_property_wrapper').show();

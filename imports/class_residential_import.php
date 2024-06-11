@@ -47,7 +47,7 @@ class ResidentialImport extends Import
             'property_latitude' =>$data['latitude'],//laitud de la propiedad 
             'property_longitude' =>$data['longitude'],//longitud de la propiedad
             'property_country' =>'Colombia',
-            'administracion'=>$data['monthly_assessment'],
+            'administracion'=>'$'.number_format($data['monthly_assessment'], 0, '.'),
             // 'page_show_adv_search'=>'global',
             'page_use_float_search'=>'global',
             

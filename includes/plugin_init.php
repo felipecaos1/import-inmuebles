@@ -147,14 +147,14 @@ function custom_plugin_process_url()
     if (isset($_GET['batch_zip'])) {
         $batch = $_GET['batch_zip'];
         if ($batch != '' && is_numeric($batch)) {
-            // $file_manager = new FileManager();
-            // $file_manager->load_all_zip($batch);
+            $file_manager = new FileManager();
+            $file_manager->load_all_zip($batch);
             
-            $script_path = IMPORTMLS_DIR . 'includes/load_scripts_php.php';
-            $command = "php {$script_path} batch_zip={$batch} > /dev/null 2>&1 &";
-            $output = shell_exec($command);
-            echo $output;
-            exit;
+            // $script_path = IMPORTMLS_DIR . 'includes/load_scripts_php.php';
+            // $command = "php {$script_path} batch_zip={$batch} > /dev/null 2>&1 &";
+            // $output = shell_exec($command);
+            // echo $output;
+            // exit;
         }
         echo '<h1 style="color:red;">Ingresa un lote valido a ejecutar</h1>';
         exit;
