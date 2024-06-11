@@ -1,10 +1,10 @@
 <?php
 
-require IMPORTMLS_DIR . 'includes/delete_scaled.php';
+require IMPORTMLS_DIR . 'includes/class_log.php';
 require IMPORTMLS_DIR . 'includes/load_scripts.php';
 require IMPORTMLS_DIR . 'includes/create_menu.php';
 require IMPORTMLS_DIR . 'includes/set_mimes.php';
-require IMPORTMLS_DIR . 'includes/class_log.php';
+require IMPORTMLS_DIR . 'includes/delete_scaled.php';
 
 require IMPORTMLS_DIR . 'includes/class_file_manager.php';
 
@@ -95,9 +95,9 @@ function guardar_credenciales_ftp()
     setlocale(LC_TIME, 'es_ES.UTF-8');
 
     if(isset($_POST['import-file'])){
-        $import_files = new FileManager();
-        $import_files->import();
-        exit;
+        // $import_files = new FileManager();
+        // $import_files->import();
+        // exit;
     }
 }
 
@@ -147,14 +147,14 @@ function custom_plugin_process_url()
     if (isset($_GET['batch_zip'])) {
         $batch = $_GET['batch_zip'];
         if ($batch != '' && is_numeric($batch)) {
-            $file_manager = new FileManager();
-            $file_manager->load_all_zip($batch);
+            // $file_manager = new FileManager();
+            // $file_manager->load_all_zip($batch);
             
-            // $script_path = IMPORTMLS_DIR . 'includes/load_scripts_php.php';
-            // $command = "php {$script_path} batch_zip={$batch} > /dev/null 2>&1 &";
-            // $output = shell_exec($command);
-            // echo $output;
-            // exit;
+            $script_path = IMPORTMLS_DIR . 'includes/load_scripts_php.php';
+            $command = "php {$script_path} batch_zip={$batch} > /dev/null 2>&1 &";
+            $output = shell_exec($command);
+            echo $output;
+            exit;
         }
         echo '<h1 style="color:red;">Ingresa un lote valido a ejecutar</h1>';
         exit;
@@ -165,16 +165,16 @@ function custom_plugin_process_url()
         $import_type = $_GET['import'];
         $date = isset($_GET['date']) ? $_GET['date'] : null;
         if ($import_type != '') {
-            $file_manager = new FileManager();
-            $file_manager->import($import_type,$date);
+            // $file_manager = new FileManager();
+            // $file_manager->import($import_type,$date);
             // init_delete_img_scaled($import_type);
-            exit;
-
-            // $script_path = IMPORTMLS_DIR . 'includes/load_scripts_php.php';
-            // $command = "php {$script_path} import={$import_type}&date={$date} > /dev/null 2>&1 &";
-            // $output = shell_exec($command);
-            // echo $output;
             // exit;
+            
+            $script_path = IMPORTMLS_DIR . 'includes/load_scripts_php.php';
+            $command = "php {$script_path} import={$import_type}&date={$date} > /dev/null 2>&1 &";
+            $output = shell_exec($command);
+            echo $output;
+            exit;
         }
     }
 }

@@ -166,7 +166,7 @@ class ResidentialImport extends Import
             // property_status: vacio
             $this->set_taxonomia($post_id, [$data['remodelled']], 'property_status');
 
-            } else {
+        } else {
             Log::error('Error, no hay un id para establecer las taxonomias');
         }        
     }

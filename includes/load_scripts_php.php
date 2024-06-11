@@ -22,8 +22,6 @@ if (isset($argv[1]) && strpos($argv[1], 'batch_zip=') === 0) {
 // Verificar si se proporciona el parámetro 'import'
 if (isset($argv[1]) && strpos($argv[1], 'import=') === 0) {
     // Extraer el valor del parámetro 'import'
-    echo 'funciona';
-    exit;
     $importParams = explode('&', $argv[1]);
     $import_type = substr($importParams[0], strlen('import='));
     $date = isset($importParams[1]) ? substr($importParams[1], strlen('date=')) : null;
