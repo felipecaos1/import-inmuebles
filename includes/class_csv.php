@@ -24,7 +24,7 @@ class Csv
                 // ini_set('memory_limit', '512M'); // Ajusta el límite de memoria
                 
                 $csv_data = [];
-                $batch_size = 3; // Tamaño del lote para procesamiento por lotes
+                $batch_size = 60; // Tamaño del lote para procesamiento por lotes
                 $counter = 0;
 
                 while (($data = fgetcsv($file_handle)) !== false) {
@@ -39,9 +39,9 @@ class Csv
                             $csv_data = []; // Reiniciar el array para el siguiente lote
                         }
                     }
-                    if($counter == $batch_size){
-                        break;
-                    }
+                    // if($counter == $batch_size){
+                    //     break;
+                    // }
                     $counter++;
                 }
 

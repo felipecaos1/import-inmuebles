@@ -155,7 +155,7 @@ class CommercialImport extends Import
             
             // Taxonomias
             // property_category: single: casa-apto,etc
-            $this->set_taxonomia($post_id, [$data['property_type']], 'property_category');
+            $this->set_taxonomia($post_id, [$data['commercial_type']], 'property_category');
             // property_action_category: single: compra-venta-nodisponible, se asigna por defecto Venta(id=51)
             wp_set_object_terms($post_id, 51 , 'property_action_category', false);
             // property_city: ciudades agrupadas
