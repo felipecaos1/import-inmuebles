@@ -103,6 +103,7 @@ class Import
     protected function get_post_galery_ids($id_unique, $multi_count, $post_galery_insert)
     {
         $list_ids = [];
+        $imagenes = [];
         $string_post_galery = $post_galery_insert; //"2,3,4,5" || ""
         $cont_porcess = 1;
 
@@ -127,29 +128,36 @@ class Import
                 $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
                 $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
                 if ( file_exists( $ruta_img ) ){
+
                     $imagen_id = get_option('id_preview');
-                    if($i === 2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
-                        $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
-                        $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
-                        if (is_wp_error($result)) {
-                            Log::error('Hubo un error al convertir la imagen '.$id_unique.$ext);
-                        }else{
-                            $ruta_img = $destination_path;
-                        }
-                        $imagen_id = $this->load_image_and_get_id($ruta_img);
+
+                    // if($i === 2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
+                    //     $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
+                    //     $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
+                    //     if (is_wp_error($result)) {
+                    //         Log::error('Hubo un error al convertir la imagen '.$id_unique.$ext);
+                    //     }else{
+                    //         $ruta_img = $destination_path;
+                    //     }
+                    //     $imagen_id = $this->load_image_and_get_id($ruta_img);
                             
-                    }
-                    if ($imagen_id) {
-                        $list_ids[]= $imagen_id;
+                    // }
+
+                    // if ($imagen_id) {
+                        // $list_ids[]= $imagen_id;
+                        $imagenes[] = [
+                            'id' => $imagen_id,
+                            'url' => $ruta_img,
+                        ];
                         if(!empty($string_post_galery)){
                             $string_post_galery .=','.$i;
                         }else{
                             $string_post_galery .= $i;
                         }
                         $cont_porcess ++;
-                    }else {
-                        // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
-                    }
+                    // }else {
+                    //     // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
+                    // }
                 }else{
                     // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
                 }
@@ -160,9 +168,10 @@ class Import
         $this->update_by_unique_id($id_unique,['post_galery_insert' => $string_post_galery]);
         
 
-        $str_ids = implode(',', $list_ids );
+        // $str_ids = implode(',', $list_ids );
 
-        return $str_ids;
+        // return $str_ids;
+        return  $imagenes;
     }
 
     /**
