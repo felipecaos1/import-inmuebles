@@ -228,9 +228,9 @@ class Import
         });
 
         // Crear un array asociativo donde cada elemento tiene el valor 'true'
-        $array_resultado = array_fill_keys($elementos, 'true');
+        // $array_resultado = array_fill_keys($elementos, 'true');
      
-        return $array_resultado;
+        return $elementos;
     }
 
      /**
