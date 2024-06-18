@@ -21,16 +21,20 @@ class CommercialImport extends Import
     {
         // Log::info('Inmueble '.$data['unique_id']);
         
-        $key = array_search($data['unique_id'], array_column($this->data_result, 'unique_id'));
-        if ($key !== false) {
-            $this->inmueble = $this->data_result[$key];
-        } else {
+        //$key = array_search($data['unique_id'], array_column($this->data_result, 'unique_id'));
+        //if ($key !== false) {
+        //    $this->inmueble = $this->data_result[$key];
+        //} else {
+        //    $this->inmueble = $this->insert_data_into_table($data['unique_id'],'commercial');
+        //}
+        
+        $this->inmueble = $this->get_by_unique_id($data['unique_id']);
+        if(!$this->inmueble) {
             $this->inmueble = $this->insert_data_into_table($data['unique_id'],'commercial');
         }
         
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
-        // funcion para crear un array con los id de las imagenes
-        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
+        
 
         // - street_name_es no llega
         $data['street_name_es'] = '';
@@ -62,6 +66,9 @@ class CommercialImport extends Import
             'urbanizacion' =>($data['subdivision'] !='No aplica')? $data['subdivision']:'',
             'is_mls' => true
         );
+        
+        // funcion para crear un array con los id de las imagenes
+        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
 
         if ($this->inmueble->post_created) {
             // Actualiza el post existente
@@ -88,7 +95,7 @@ class CommercialImport extends Import
             $post_data = array(
                 'ID'            => $post_id,
                 'post_title'    => $data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
-                // 'post_status'   => 'publish', 
+                'post_status'   => 'publish', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
             );
@@ -96,7 +103,7 @@ class CommercialImport extends Import
             $updated = wp_update_post($post_data);
 
             if (!is_wp_error($updated)) {
-                Log::info('Inmueble Actualizado');
+                // Log::info('Inmueble Actualizado');
             } else {
                 $error_message = $updated->get_error_message();
                 Log::info('Error al actualizar el inmueble: ' . $error_message);
@@ -108,8 +115,8 @@ class CommercialImport extends Import
 
             $post_data = array(
                 'post_title'    =>$data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '. $data['id'],
-                // 'post_status'   => 'publish', 
-                'post_status'   => 'pending', 
+                'post_status'   => 'publish', 
+                //'post_status'   => 'pending', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
             );        
@@ -117,7 +124,7 @@ class CommercialImport extends Import
             $post_id = wp_insert_post($post_data);
 
             if (!is_wp_error($post_id)) {
-                Log::info('Inmueble Creado');
+                //Log::info('Inmueble Creado');
                 // Imagen destacada
                 $result_feature_img = $this->set_feature_img($post_id, $ruta_feature_img);
                 

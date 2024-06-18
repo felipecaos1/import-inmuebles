@@ -90,7 +90,6 @@ class Import
             return $result; // Retornar el error para manejo externo
         }
     
-        // Log::info('Se establecio la taxonomia: '. $tax);
         return true;
     }
     
@@ -104,8 +103,9 @@ class Import
     protected function get_post_galery_ids($id_unique, $multi_count, $post_galery_insert)
     {
         $list_ids = [];
-        $save_post_galery_insert = true;
+        $string_post_galery = $post_galery_insert; //"2,3,4,5" || ""
         $cont_porcess = 1;
+
 
         if (!empty($post_galery_insert)) {
             $post_galery_insert = explode(',', $post_galery_insert); // Arreglo con los datos convertidos
@@ -120,16 +120,14 @@ class Import
                 $save_post_galery_insert = false;
                 break;
             }
-            if($count_galery_insert >= 6){ //Validar que tengan N catidad o menos en la base de datos, si las tiene para el bucle
-                break;
-            }
+            
+            //if($cont_porcess > 2){break;}
+
             if(!in_array($i,$post_galery_insert)){ //Se valida que solo ingrese los que no esten en el resultado de la base de datos 
-                if($cont_porcess > 2){ //Solo permitir N proceso para cargue de las imagenes
-                    break;
-                }
                 $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
                 $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
                 if ( file_exists( $ruta_img ) ){
+                    $imagen_id = get_option('id_preview');
                     if($i === 2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
                         $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
                         $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
@@ -138,15 +136,20 @@ class Import
                         }else{
                             $ruta_img = $destination_path;
                         }
+                        $imagen_id = $this->load_image_and_get_id($ruta_img);
+                            
                     }
-                    $imagen_id = $this->load_image_and_get_id($ruta_img);
                     if ($imagen_id) {
                         $list_ids[]= $imagen_id;
-                        $post_galery_insert[]= $i; //Agregamos el valor de $i al arreglo
-                    } else {
+                        if(!empty($string_post_galery)){
+                            $string_post_galery .=','.$i;
+                        }else{
+                            $string_post_galery .= $i;
+                        }
+                        $cont_porcess ++;
+                    }else {
                         // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
                     }
-                    $cont_porcess ++;
                 }else{
                     // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
                 }
@@ -154,10 +157,8 @@ class Import
 
         }
         
-        if($save_post_galery_insert){
-            $post_galery_insert = implode(',', $post_galery_insert );//Lo convertimos en cadena nuevamente para poderlo guardar en la base de datos
-            $this->update_by_unique_id($id_unique,['post_galery_insert' => $post_galery_insert]);
-        }
+        $this->update_by_unique_id($id_unique,['post_galery_insert' => $string_post_galery]);
+        
 
         $str_ids = implode(',', $list_ids );
 
@@ -347,13 +348,13 @@ class Import
         global $wpdb;
     
         $tabla_nombre = $wpdb->prefix . TABLE_NAME;
-    
-        $resultado = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT * FROM $tabla_nombre WHERE unique_id = %d", $unique_id
-            )
-        );
-    
+        
+        // Prepara la consulta con un marcador de posición.
+        $consulta_preparada = $wpdb->prepare("SELECT * FROM $tabla_nombre WHERE unique_id = %s", $unique_id);
+        
+        // Ejecuta la consulta preparada.
+        $resultado = $wpdb->get_row($consulta_preparada);
+        
         return $resultado;
     }
 

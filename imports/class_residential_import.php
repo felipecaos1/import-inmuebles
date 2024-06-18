@@ -18,10 +18,15 @@ class ResidentialImport extends Import
      */
     public function crear_inmueble($data)
     {
-        $key = array_search($data['unique_id'], array_column($this->data_result, 'unique_id'));
-        if ($key !== false) {
-            $this->inmueble = $this->data_result[$key];
-        } else {
+        //$key = array_search($data['unique_id'], array_column($this->data_result, 'unique_id'));
+        //if ($key !== false) {
+        //    $this->inmueble = $this->data_result[$key];
+        //} else {
+        //    $this->inmueble = $this->insert_data_into_table($data['unique_id'],'residential');
+        //}
+        
+        $this->inmueble = $this->get_by_unique_id($data['unique_id']);
+        if(!$this->inmueble) {
             $this->inmueble = $this->insert_data_into_table($data['unique_id'],'residential');
         }
         
@@ -55,6 +60,7 @@ class ResidentialImport extends Import
 
         // funcion para crear un array con los id de las imagenes
         $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
+       
         
         if ($this->inmueble->post_created) {
             // Actualiza el post existente
@@ -79,10 +85,12 @@ class ResidentialImport extends Import
                 $meta_datos['galeria-de-imagenes'] =  $new_gallery;
             }
             
+            // $post_status = $this->inmueble->post_galery_insert != null && $this->inmueble->post_galery_insert != '' ? 'publish' : 'pending';
+            
             $post_data = array(
                 'ID'            => $post_id,
                 'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
-                // 'post_status'   => 'publish', 
+                'post_status'   => 'publish', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
             );
@@ -96,17 +104,18 @@ class ResidentialImport extends Import
                 Log::info('Error al actualizar el inmueble: ' . $error_message);
             }
 
-        } else {
+        }else {
             
             $meta_datos['galeria-de-imagenes'] =  $gallery_ids;
 
             $post_data = array(
                 'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
-                // 'post_status'   => 'publish', 
+                //'post_status'   => 'publish', 
                 'post_status'   => 'pending',
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
             );
+            
             // Crea un nuevo post
             $post_id = wp_insert_post($post_data);
 
@@ -123,7 +132,7 @@ class ResidentialImport extends Import
                 }                
                 $this->update_by_unique_id($data['unique_id'],['post_created' => $post_id,'feature_img' => $result_feature_img]);
             } else {
-                $error_message = $updated->get_error_message();
+                $error_message = $post_id->get_error_message();
                 Log::info('Error al crear el inmueble: ' . $error_message);
             }
         }

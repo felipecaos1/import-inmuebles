@@ -1,10 +1,11 @@
 <?php
 
+require IMPORTMLS_DIR . 'includes/class_log.php';
+require IMPORTMLS_DIR . 'includes/class_runtime.php';
 require IMPORTMLS_DIR . 'includes/delete_scaled.php';
 require IMPORTMLS_DIR . 'includes/load_scripts.php';
 require IMPORTMLS_DIR . 'includes/create_menu.php';
 require IMPORTMLS_DIR . 'includes/set_mimes.php';
-require IMPORTMLS_DIR . 'includes/class_log.php';
 
 require IMPORTMLS_DIR . 'includes/class_file_manager.php';
 
@@ -96,8 +97,8 @@ function guardar_credenciales_ftp()
 
     if(isset($_POST['import-file'])){
         $import_files = new FileManager();
-        $import_files->import();
-        exit;
+        $import_files->import('commercial');
+        $import_files->import('residential');
     }
 }
 
@@ -140,6 +141,7 @@ function dump_json(...$vars): void
  * Url : http://alterna.test/?import=commercial    &date=20240314
  * Url : http://alterna.test/?import=residential   &date=20240314
  * Url : http://alterna.test/?import=zip           &date=20240314
+ * Url : http://alterna.test/?import=execute_clear
  * @return void
  */
 function custom_plugin_process_url() 
@@ -166,8 +168,6 @@ function custom_plugin_process_url()
         if ($import_type != '') {
             // $file_manager = new FileManager();
             // $file_manager->import($import_type,$date);
-            // init_delete_img_scaled($import_type);
-            // exit;
             
             $script_path = IMPORTMLS_DIR . 'includes/load_scripts_php.php';
             $command = "php {$script_path} import={$import_type}&date={$date} > /dev/null 2>&1 &";
