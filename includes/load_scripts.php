@@ -23,16 +23,19 @@ function enqueue_custom_script_for_properties() {
                 plugins_url('js/set_img.js', IMPORTMLS_FILE),
                 array('jquery'),
                 null,
-                true
+                false
             );
 
-            $inmueble = get_by_unique_id($post_id);//
-            $post_galery_insert = explode(',', $inmueble->post_galery_insert);
-            wp_localize_script('set_img', 'MyPluginData', array(
-                'unique_id' => $inmueble->unique_id,//'0003C877'
-                'base_url' =>  plugins_url('/', IMPORTMLS_FILE).DIR_NAME_TEMP.'/',
-                'number_img'=>$post_galery_insert
-            ));
+            $inmueble = get_by_unique_id($post_id);
+            if($inmueble){
+
+                $post_galery_insert = explode(',', $inmueble->post_galery_insert);
+                wp_localize_script('set_img', 'MyPluginData', array(
+                    'unique_id' => $inmueble->unique_id,//'0003C877'
+                    'base_url' =>  plugins_url('/', IMPORTMLS_FILE).DIR_NAME_TEMP.'/',
+                    'number_img'=>$post_galery_insert
+                ));
+            }
             
         }
     }

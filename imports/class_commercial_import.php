@@ -69,7 +69,7 @@ class CommercialImport extends Import
             // 'sector' => array(
             //     $data['map_area'] => 'true'
             // ),
-            // 'galeria-de-imagenes' => $gallery_ids,
+            // 'imagenes-del-inmueble' => $gallery_ids,
             // 'urbanizacion' =>($data['subdivision'] !='No aplica')? $data['subdivision']:'',
             'is_mls' => true
         );
@@ -88,15 +88,16 @@ class CommercialImport extends Import
                 }
             }
 
-            if($gallery_ids != '' ){
-                $new_gallery='';
-                $old_gallery = get_post_meta($post_id, 'galeria-de-imagenes', true);
-                if($old_gallery != '' ){
-                    $new_gallery .= $old_gallery.',';
+            if( count($gallery_ids) > 0 ){
+                $new_gallery=[];
+                $old_gallery = get_post_meta($post_id, 'imagenes-del-inmueble', true);
+                if(count($old_gallery) > 0){
+                    $new_gallery = array_merge($old_gallery,$gallery_ids);
+                }else{
+                    $new_gallery = $gallery_ids;
                 }
-                $new_gallery .= $gallery_ids;
 
-                $meta_datos['galeria-de-imagenes'] =  $new_gallery;
+                $meta_datos['imagenes-del-inmueble'] =  $new_gallery;
             }
 
             $post_data = array(
@@ -119,7 +120,7 @@ class CommercialImport extends Import
 
         }else{
             
-            $meta_datos['galeria-de-imagenes'] =  $gallery_ids;
+            $meta_datos['imagenes-del-inmueble'] =  $gallery_ids;
 
             $post_data = array(
                 'post_title'    =>$data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '. $data['id'],

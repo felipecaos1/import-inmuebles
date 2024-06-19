@@ -176,6 +176,19 @@ function custom_plugin_process_url()
             exit;
         }
     }
+
+    if(isset($_GET['prueba'])){
+        $old_gallery = get_post_meta(3383, 'imagenes-del-inmueble', true);
+        $imagenes = [];
+        $imagenes[] = [
+            'id' => 8787 ,
+            'url' => 'ruta',
+        ];
+        echo '<pre>';
+        print_r(array_merge($old_gallery,$imagenes));
+        echo '</pre>';
+        exit;
+    }
 }
 
 /**
