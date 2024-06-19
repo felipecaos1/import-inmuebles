@@ -50,8 +50,10 @@ class CommercialImport extends Import
             'alcobas' => $data['bedrooms'],
             'ano-de-construccion' => $data['year_built'],//Calcular sobre fecha
             'precio-de-administracion' => $data['monthly_assessment'],//Calcular sobre fecha
-            'tiempo' => $data['Mensual'],//Calcular sobre fecha
+            
+            'tiempo' => 'Mensual',//Calcular sobre fecha
             'tipo-de-negocio' => 'Venta',
+            
             'tipo-de-inmueble' => $data['commercial_type'],
             'caracteristicas-internas' => $this->get_amenities($data['interior_features']),
             'caracteristicas-externas' => $this->get_amenities($data['exterior_features']),
@@ -100,7 +102,7 @@ class CommercialImport extends Import
             $post_data = array(
                 'ID'            => $post_id,
                 'post_title'    => $data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
-                'post_content'  => 'CÓDIGO '.$data['id'].'<br>'.$data['remarks_es']
+                'post_content'  => 'CÓDIGO '.$data['id'].'<br>'.$data['remarks_es'],
                 'post_status'   => 'publish', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
