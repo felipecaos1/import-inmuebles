@@ -19,6 +19,7 @@ class CommercialImport extends Import
      */
     public function crear_inmueble($data)
     {
+        global $wpdb;
         
         $this->inmueble = $this->get_by_unique_id($data['unique_id']);
         if(!$this->inmueble) {
@@ -88,17 +89,17 @@ class CommercialImport extends Import
                 }
             }
 
-            if( count($gallery_ids) > 0 ){
-                $new_gallery=[];
-                $old_gallery = get_post_meta($post_id, 'imagenes-del-inmueble', true);
-                if(count($old_gallery) > 0){
-                    $new_gallery = array_merge($old_gallery,$gallery_ids);
-                }else{
-                    $new_gallery = $gallery_ids;
-                }
+            // if( count($gallery_ids) > 0 ){
+            //     $new_gallery=[];
+            //     $old_gallery = get_post_meta($post_id, 'imagenes-del-inmueble', true);
+            //     if(count($old_gallery) > 0){
+            //         $new_gallery = array_merge($old_gallery,$gallery_ids);
+            //     }else{
+            //         $new_gallery = $gallery_ids;
+            //     }
 
-                $meta_datos['imagenes-del-inmueble'] =  $new_gallery;
-            }
+            //     $meta_datos['imagenes-del-inmueble'] =  $new_gallery;
+            // }
 
             $post_data = array(
                 'ID'            => $post_id,
@@ -120,12 +121,13 @@ class CommercialImport extends Import
 
         }else{
             
-            $meta_datos['imagenes-del-inmueble'] =  $gallery_ids;
+            // $meta_datos['imagenes-del-inmueble'] =  $gallery_ids;
 
             $post_data = array(
                 'post_title'    =>$data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '. $data['id'],
-                'post_status'   => 'publish', 
-                //'post_status'   => 'pending', 
+                'post_content'  => 'CÓDIGO '.$data['id'].'<br>'.$data['remarks_es'],
+                // 'post_status'   => 'publish', 
+                'post_status'   => 'pending', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
             );        
@@ -149,6 +151,29 @@ class CommercialImport extends Import
                 $this->set_taxonomia($post_id, 23 , 'pais'); //Colombia
                 $this->set_taxonomia($post_id, 19 , 'estado-del-inmueble');//Activo
                 $this->set_taxonomia($post_id, 15 , 'tipo-de-negocio'); //Venta
+                
+                // ID de la relación (13 en este caso)
+                $relation_id = 13;
+                $agente_id = 1021;
+                // Insertar la nueva relación en la tabla jet_rel_default
+                $table_name = $wpdb->prefix . 'jet_rel_default';
+
+                $data2 = array(
+                    'rel_id'            => $relation_id,             // ID de la relación
+                    'parent_rel'        => 0,                        // ID de la relación principal (0 si no aplica)
+                    'parent_object_id'  => $agente_id,               // ID del agente (padre)
+                    'child_object_id'   => $post_id             // ID de la propiedad (hijo)
+                );
+
+                $format = array(
+                 
+                    '%d',   // rel_id
+                    '%d',   // parent_rel
+                    '%d',   // parent_object_id
+                    '%d'    // child_object_id
+                );
+
+                $wpdb->insert( $table_name, $data2, $format );
 
             }else{
                 $error_message = $post_id->get_error_message();

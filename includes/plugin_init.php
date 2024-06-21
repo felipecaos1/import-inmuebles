@@ -137,11 +137,11 @@ function dump_json(...$vars): void
  * Esta función verifica si el parámetro 'batch_zip' está presente en la URL. Si el parámetro existe y 
  * su valor es un número válido, se crea una instancia de la clase FileManager y se llama al método 
  * load_all_zip con el valor del lote. Si el lote no es válido, se muestra un mensaje de error.
- * Url : http://alterna.test/?batch_zip=1
- * Url : http://alterna.test/?import=commercial    &date=20240314
- * Url : http://alterna.test/?import=residential   &date=20240314
- * Url : http://alterna.test/?import=zip           &date=20240314
- * Url : http://alterna.test/?import=execute_clear
+ * Url : http://friendsinmobiliaria.test/?batch_zip=1
+ * Url : http://friendsinmobiliaria.test/?import=commercial    &date=20240314
+ * Url : http://friendsinmobiliaria.test/?import=residential   &date=20240314
+ * Url : http://friendsinmobiliaria.test/?import=zip           &date=20240314
+ * Url : http://friendsinmobiliaria.test/?import=execute_clear
  * @return void
  */
 function custom_plugin_process_url() 
@@ -166,14 +166,14 @@ function custom_plugin_process_url()
         $import_type = $_GET['import'];
         $date = isset($_GET['date']) ? $_GET['date'] : null;
         if ($import_type != '') {
-            // $file_manager = new FileManager();
-            // $file_manager->import($import_type,$date);
+            $file_manager = new FileManager();
+            $file_manager->import($import_type,$date);
             
-            $script_path = IMPORTMLS_DIR . 'includes/load_scripts_php.php';
-            $command = "php {$script_path} import={$import_type}&date={$date} > /dev/null 2>&1 &";
-            $output = shell_exec($command);
-            echo $output;
-            exit;
+            // $script_path = IMPORTMLS_DIR . 'includes/load_scripts_php.php';
+            // $command = "php {$script_path} import={$import_type}&date={$date} > /dev/null 2>&1 &";
+            // $output = shell_exec($command);
+            // echo $output;
+            // exit;
         }
     }
 

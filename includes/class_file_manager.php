@@ -89,8 +89,8 @@ class FileManager
         Log::info('Inicia la importación de '.$import_type);
 
         if($date == null){
-            // $date = date('Ymd');
-            $date = '20240617';
+            $date = date('Ymd');
+            // $date = '20240617';
         }
 
         $residentialFile = "/res{$date}.csv";
@@ -114,7 +114,7 @@ class FileManager
         }else if($import_type == 'commercial'){
             //Procesar Comercial
             $this->import_file($commercialFile,'commercial');
-            $this->delete_file($commercialFile);
+            // $this->delete_file($commercialFile);
         }else if($import_type == 'residential'){
             //Procesar Residencial
             $this->import_file($residentialFile,'residential');

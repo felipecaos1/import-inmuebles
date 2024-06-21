@@ -129,7 +129,7 @@ class Import
                 $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
                 if ( file_exists( $ruta_img ) ){
 
-                    $imagen_id = get_option('id_preview');
+                    // $imagen_id = get_option('id_preview');
 
                     // if($i === 2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
                     //     $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
@@ -145,10 +145,10 @@ class Import
 
                     // if ($imagen_id) {
                         // $list_ids[]= $imagen_id;
-                        $imagenes[] = [
-                            'id' => $imagen_id,
-                            'url' => $ruta_img,
-                        ];
+                        // $imagenes[] = [
+                        //     'id' => $imagen_id,
+                        //     'url' => $ruta_img,
+                        // ];
                         if(!empty($string_post_galery)){
                             $string_post_galery .=','.$i;
                         }else{
@@ -171,7 +171,8 @@ class Import
         // $str_ids = implode(',', $list_ids );
 
         // return $str_ids;
-        return  $imagenes;
+        // return  $imagenes;
+        return '';
     }
 
     /**

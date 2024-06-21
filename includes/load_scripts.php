@@ -18,16 +18,24 @@ function enqueue_custom_script_for_properties() {
         $post_id = get_the_ID();//obtenemos el id del post
 
         if($post_id){
-            wp_enqueue_script(
-                'set_img',
-                plugins_url('js/set_img.js', IMPORTMLS_FILE),
-                array('jquery'),
-                null,
-                false
-            );
-
             $inmueble = get_by_unique_id($post_id);
-            if($inmueble){
+            if(true){
+
+                wp_enqueue_script(
+                    'set_img',
+                    plugins_url('js/set_img.js', IMPORTMLS_FILE),
+                    array('jquery'),
+                    null,
+                    true
+                );
+
+                wp_enqueue_style(
+                    'gallery_css',
+                    plugins_url('css/gallery_css.css', IMPORTMLS_FILE),
+                    array(),
+                    '20120208',
+                    'all'
+                );
 
                 $post_galery_insert = explode(',', $inmueble->post_galery_insert);
                 wp_localize_script('set_img', 'MyPluginData', array(
