@@ -20,8 +20,12 @@
     border-radius: 10px;
     height: 140px;
     object-fit: cover;
+    width: 100%;
 }
-
+.swiper-container-thumbs .swiper-slide{
+    padding: 0 5px;
+    cursor: pointer;
+}
 .swiper-container-thumbs .swiper-button-prev,
 .swiper-container-thumbs .swiper-button-next{
     background: #ffffff;
@@ -41,4 +45,40 @@
 .swiper-container-thumbs:hover .swiper-button-prev,
 .swiper-container-thumbs:hover .swiper-button-next{
     opacity: 1!important;
+}
+
+.elementor-element-2c7aec5 div.elementor-image-carousel-wrapper.swiper{
+    display: none;
+}
+
+
+.main-slider-movil  .swiper-button-prev,
+.main-slider-movil  .swiper-button-next{
+    background: #ffffff;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    box-shadow: 3px 3px 10px #38383856;
+    transition: all .3s linear;
+}
+.main-slider-movil  .swiper-button-prev:after,
+.main-slider-movil  .swiper-button-next:after{
+    font-size: 15px;
+}
+.main-slider-movil .swiper-slide img {
+    border-radius: 10px;
+    height: 350px;
+    object-fit: cover;
+    width: 100%;
+}
+@media screen and (min-width:767px){
+    .main-slider-movil{
+        display: none;
+    }
+}
+
+
+.jet-listing-dynamic-field__content,
+.jet-listing-dynamic-field__inline-wrap{
+    width: 100%!important;
 }

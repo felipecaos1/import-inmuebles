@@ -405,6 +405,33 @@ class Import
     
         return $resultado !== false;
     }
+
+    protected function create_agent_relation($post_id){
+        global $wpdb;
+        
+        $relation_id = 13; //realcion agente-propiedad
+        $agente_id = 1021; //agente Lina Gaviria
+
+        // Insertar la nueva relación en la tabla jet_rel_default
+        $table_name = $wpdb->prefix . 'jet_rel_default';
+
+        $data2 = array(
+            'rel_id'            => $relation_id,             
+            'parent_rel'        => 0,                        
+            'parent_object_id'  => $agente_id,               
+            'child_object_id'   => $post_id           
+        );
+
+        $format = array(
+         
+            '%d',   // rel_id
+            '%d',   // parent_rel
+            '%d',   // parent_object_id
+            '%d'    // child_object_id
+        );
+
+        $wpdb->insert( $table_name, $data2, $format );
+    }
     
 
 }

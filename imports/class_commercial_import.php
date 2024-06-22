@@ -19,7 +19,6 @@ class CommercialImport extends Import
      */
     public function crear_inmueble($data)
     {
-        global $wpdb;
         
         $this->inmueble = $this->get_by_unique_id($data['unique_id']);
         if(!$this->inmueble) {
@@ -38,15 +37,13 @@ class CommercialImport extends Import
         
         // Metacampos
         $meta_datos = array(
-
-
             'precio-de-venta--precio-de-alquiler' => $data['price_current'],
             'area-totalterreno' => $data['lot_sqft'],
             'area-construida' => $data['sqft_total'],
             'area-privada' => $data['sqft_total'],
             'estado-fisico-de-la-propiedad' => $data['remodelled'],
             'estrato' => 'N/A',
-            'garage' => ($data['parking_spaces'] != 0)? $data['parking_spaces'].' estacionamientos':'Sin estacionamientos',
+            'garage' => $data['parking_spaces'],
             'banos' => $data['bathrooms'],
             'alcobas' => $data['bedrooms'],
             'ano-de-construccion' => $data['year_built'],//Calcular sobre fecha
@@ -60,18 +57,6 @@ class CommercialImport extends Import
             'caracteristicas-externas' => $this->get_amenities($data['exterior_features']),
 
 
-
-            // '_direccion' => $data['street_name_es'].', '.$data['map_area'].', '.$data['district'],
-            // 'descripcion' => $data['remarks_es'],
-            // 'id'=> $data['id'],
-            // 'floor' => '',
-            // 'bodega' =>'',
-            // 'comodidades' => $this->get_amenities($data['interior_features'].','.$data['exterior_features']),
-            // 'sector' => array(
-            //     $data['map_area'] => 'true'
-            // ),
-            // 'imagenes-del-inmueble' => $gallery_ids,
-            // 'urbanizacion' =>($data['subdivision'] !='No aplica')? $data['subdivision']:'',
             'is_mls' => true
         );
         
@@ -147,33 +132,16 @@ class CommercialImport extends Import
                     }
                 }
                 $this->update_by_unique_id($data['unique_id'],['post_created' => $post_id,'feature_img' => $result_feature_img]);
+
+                // Taxonomias
                 
                 $this->set_taxonomia($post_id, 23 , 'pais'); //Colombia
                 $this->set_taxonomia($post_id, 19 , 'estado-del-inmueble');//Activo
                 $this->set_taxonomia($post_id, 15 , 'tipo-de-negocio'); //Venta
                 
-                // ID de la relación (13 en este caso)
-                $relation_id = 13;
-                $agente_id = 1021;
-                // Insertar la nueva relación en la tabla jet_rel_default
-                $table_name = $wpdb->prefix . 'jet_rel_default';
+                // Creación de la relaciín Agente-Propiedad
+                $this->create_agent_relation($post_id);
 
-                $data2 = array(
-                    'rel_id'            => $relation_id,             // ID de la relación
-                    'parent_rel'        => 0,                        // ID de la relación principal (0 si no aplica)
-                    'parent_object_id'  => $agente_id,               // ID del agente (padre)
-                    'child_object_id'   => $post_id             // ID de la propiedad (hijo)
-                );
-
-                $format = array(
-                 
-                    '%d',   // rel_id
-                    '%d',   // parent_rel
-                    '%d',   // parent_object_id
-                    '%d'    // child_object_id
-                );
-
-                $wpdb->insert( $table_name, $data2, $format );
 
             }else{
                 $error_message = $post_id->get_error_message();
@@ -187,7 +155,6 @@ class CommercialImport extends Import
             $this->set_taxonomia($post_id, $data['map_area'] , 'zonabarrio');
             $this->set_taxonomia($post_id, $data['district'] , 'ciudad');
             // $this->set_taxonomia($post_id,  , 'departamento');
-            // $this->set_taxonomia($post_id, $this->get_property_type($data['commercial_type']), 'tipo-de-propiedad');          
         } else {
             Log::error('Error, no hay un id para establecer las taxonomias');
         }        

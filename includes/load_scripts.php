@@ -19,7 +19,7 @@ function enqueue_custom_script_for_properties() {
 
         if($post_id){
             $inmueble = get_by_unique_id($post_id);
-            if(true){
+            if($inmueble){
 
                 wp_enqueue_script(
                     'set_img',

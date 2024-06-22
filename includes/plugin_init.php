@@ -173,7 +173,7 @@ function custom_plugin_process_url()
             // $command = "php {$script_path} import={$import_type}&date={$date} > /dev/null 2>&1 &";
             // $output = shell_exec($command);
             // echo $output;
-            // exit;
+            exit;
         }
     }
 

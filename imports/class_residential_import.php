@@ -18,12 +18,6 @@ class ResidentialImport extends Import
      */
     public function crear_inmueble($data)
     {
-        //$key = array_search($data['unique_id'], array_column($this->data_result, 'unique_id'));
-        //if ($key !== false) {
-        //    $this->inmueble = $this->data_result[$key];
-        //} else {
-        //    $this->inmueble = $this->insert_data_into_table($data['unique_id'],'residential');
-        //}
         
         $this->inmueble = $this->get_by_unique_id($data['unique_id']);
         if(!$this->inmueble) {
@@ -33,28 +27,27 @@ class ResidentialImport extends Import
         // $existing_post_id = $this->buscar_inmueble_por_id($data['id']);        
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
 
-
-        // Metacampos
         $meta_datos = array(
-            'valor' => $data['price_current'],
-            '_direccion' => $data['street_name_es'].', '.$data['map_area'].', '.$data['district'],
-            'area-de-la-propiedad' => $data['lot_sqft'],
+            'precio-de-venta--precio-de-alquiler' => $data['price_current'],
+            'area-totalterreno' => $data['lot_sqft'],
             'area-construida' => $data['sqft_total'],
-            'descripcion' => $data['remarks_es'],
-            'estrato' => '',
-            'id'=> $data['id'],
-            'tiempo-construccion' => $this->calculate_built_time($data['year_built']),//Calcular sobre fecha
-            'floor' => '',
-            'estacionamiento' => ($data['parking_spaces'] != 0)? $data['parking_spaces'].' estacionamientos':'Sin estacionamientos',
-            'habitaciones' => $data['bedrooms'],
+            'area-privada' => $data['sqft_total'],
+            'estado-fisico-de-la-propiedad' => $data['remodelled'],
+            'estrato' => 'N/A',
+            'garage' => $data['parking_spaces'],
             'banos' => $data['bathrooms'],
-            'bodega' =>'',
-            'comodidades' => $this->get_amenities($data['interior_features'].','.$data['exterior_features']),
-            'sector' => array(
-                $data['map_area'] => 'true'
-            ),
-            // 'galeria-de-imagenes' => $gallery_ids,
-            'urbanizacion' =>($data['subdivision'] !='No aplica')? $data['subdivision']:'',
+            'alcobas' => $data['bedrooms'],
+            'ano-de-construccion' => $data['year_built'],//Calcular sobre fecha
+            'precio-de-administracion' => $data['monthly_assessment'],//Calcular sobre fecha
+            
+            'tiempo' => 'Mensual',//Calcular sobre fecha
+            'tipo-de-negocio' => 'Venta',
+            
+            'tipo-de-inmueble' => $data['property_type'],
+            'caracteristicas-internas' => $this->get_amenities($data['interior_features']),
+            'caracteristicas-externas' => $this->get_amenities($data['exterior_features']),
+
+
             'is_mls' => true
         );
 
@@ -74,22 +67,23 @@ class ResidentialImport extends Import
                 }
             }
 
-            if($gallery_ids != '' ){
-                $new_gallery='';
-                $old_gallery = get_post_meta($post_id, 'galeria-de-imagenes', true);
-                if($old_gallery != '' ){
-                    $new_gallery .= $old_gallery.',';
-                }
-                $new_gallery .= $gallery_ids;
+            // if($gallery_ids != '' ){
+            //     $new_gallery='';
+            //     $old_gallery = get_post_meta($post_id, 'galeria-de-imagenes', true);
+            //     if($old_gallery != '' ){
+            //         $new_gallery .= $old_gallery.',';
+            //     }
+            //     $new_gallery .= $gallery_ids;
 
-                $meta_datos['galeria-de-imagenes'] =  $new_gallery;
-            }
+            //     $meta_datos['galeria-de-imagenes'] =  $new_gallery;
+            // }
             
             // $post_status = $this->inmueble->post_galery_insert != null && $this->inmueble->post_galery_insert != '' ? 'publish' : 'pending';
             
             $post_data = array(
                 'ID'            => $post_id,
                 'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
+                'post_content'  => 'CÓDIGO '.$data['id'].'<br>'.$data['remarks_es'],
                 'post_status'   => 'publish', 
                 'post_type'     => 'propiedades',
                 'meta_input'    => $meta_datos 
@@ -110,6 +104,7 @@ class ResidentialImport extends Import
 
             $post_data = array(
                 'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
+               'post_content'  => 'CÓDIGO '.$data['id'].'<br>'.$data['remarks_es'],
                 //'post_status'   => 'publish', 
                 'post_status'   => 'pending',
                 'post_type'     => 'propiedades',
@@ -131,6 +126,17 @@ class ResidentialImport extends Import
                     }
                 }                
                 $this->update_by_unique_id($data['unique_id'],['post_created' => $post_id,'feature_img' => $result_feature_img]);
+            
+                // Taxonomias
+                
+                $this->set_taxonomia($post_id, 23 , 'pais'); //Colombia
+                $this->set_taxonomia($post_id, 19 , 'estado-del-inmueble');//Activo
+                $this->set_taxonomia($post_id, 15 , 'tipo-de-negocio'); //Venta
+                
+                // Creación de la relaciín Agente-Propiedad
+                $this->create_agent_relation($post_id);
+
+
             } else {
                 $error_message = $post_id->get_error_message();
                 Log::info('Error al crear el inmueble: ' . $error_message);
@@ -139,8 +145,8 @@ class ResidentialImport extends Import
 
         // Verificar si hay un post 
         if ($post_id) {
-            $this->set_taxonomia($post_id, $data['district'], 'ciudad');
-            $this->set_taxonomia($post_id, $this->get_property_type($data['property_type']), 'tipo-de-propiedad');
+            $this->set_taxonomia($post_id, $data['map_area'] , 'zonabarrio');
+            $this->set_taxonomia($post_id, $data['district'] , 'ciudad');
         } else {
             Log::error('Error, no hay un id para establecer las taxonomias');
         }        
