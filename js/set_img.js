@@ -4,10 +4,10 @@ jQuery(document).ready(function($) {
     
     if (typeof MyPluginData !== 'undefined') {
         var unique_id = MyPluginData.unique_id;
-        // var base_url = MyPluginData.base_url;
-        var base_url = 'https://alternainmobiliaria.com/wp-content/plugins/import-inmuebles/data/temp/';
+        var base_url = MyPluginData.base_url;
+        // var base_url = 'https://alternainmobiliaria.com/wp-content/plugins/import-inmuebles/data/temp/';
         var number_img = MyPluginData.number_img;
-        console.log(number_img);
+        // console.log(number_img);
         
         if(unique_id){
 

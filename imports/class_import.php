@@ -103,7 +103,7 @@ class Import
     protected function get_post_galery_ids($id_unique, $multi_count, $post_galery_insert)
     {
         $list_ids = [];
-        $imagenes = [];
+        // $imagenes = [];
         $string_post_galery = $post_galery_insert; //"2,3,4,5" || ""
         $cont_porcess = 1;
 
