@@ -102,7 +102,7 @@ class Import
      */
     protected function get_post_galery_ids($id_unique, $multi_count, $post_galery_insert)
     {
-        $list_ids = [];
+        // $list_ids = [];
         // $imagenes = [];
         $string_post_galery = $post_galery_insert; //"2,3,4,5" || ""
         $cont_porcess = 1;
@@ -117,8 +117,7 @@ class Import
         $count_galery_insert = count($post_galery_insert);
 
         for ($i=2; $i <= $multi_count ; $i++) {            
-            if($count_galery_insert >= ($multi_count - 1)){ // Verifico si cantidad de de imagenes insertadas es mayor o igual a las que se van a procesar, pare el proceso
-                $save_post_galery_insert = false;
+            if($count_galery_insert >= ($multi_count - 1)){ // Verifico si cantidad de de imagenes insertadas es mayor o igual a las que se van a procesar, pare el proceso            
                 break;
             }
             
