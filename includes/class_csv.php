@@ -24,32 +24,43 @@ class Csv
                 // ini_set('memory_limit', '512M'); // Ajusta el límite de memoria
                 
                 $csv_data = [];
-                $batch_size = 60; // Tamaño del lote para procesamiento por lotes
+                $batch_size = 50; // Tamaño del lote para procesamiento por lotes
+                $count_for_batch_size = 0; //conteo para igualar el el ote para procesar
                 $counter = 0;
+                
+                $BATCH_SIZE_INIT = Runtime::get_runtime('BATCH_SIZE_INIT');
+                $BATCH_SIZE_END = Runtime::get_runtime('BATCH_SIZE_END');
 
                 while (($data = fgetcsv($file_handle)) !== false) {
                     if ($counter == 0) {
                         self::$header = $data;
-                    } else {
+                    } else if($counter > $BATCH_SIZE_INIT){
                         $csv_data[] = $data;
 
                         // Procesar en lotes
                         if (count($csv_data) >= $batch_size) {
+                            Log::info('Entro a process_batch: ' . $counter);
                             self::process_batch($import, $csv_data);
                             $csv_data = []; // Reiniciar el array para el siguiente lote
                         }
                     }
                     // if($counter == $batch_size){
-                    //     break;
-                    // }
+                    if($counter == $BATCH_SIZE_END){
+                        break;
+                    }
                     $counter++;
                 }
 
                 // Procesar cualquier fila restante
                 if (!empty($csv_data)) {
+                    Log::info('Entro a process_batch en fila restante: ' . $counter);
                     self::process_batch($import, $csv_data);
                 }
 
+                //Seteamos las variables de ejecución con los nuevos valores
+                Runtime::set_runtime('BATCH_SIZE_INIT', ($BATCH_SIZE_INIT + 3000));
+                Runtime::set_runtime('BATCH_SIZE_END',  ($BATCH_SIZE_END + 3000));
+                
                 fclose($file_handle);
                 Log::info('Ha terminado la importación',['Post creados' => $counter - 1]);
                 $result = true;

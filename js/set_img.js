@@ -10,18 +10,18 @@ jQuery(document).ready(function($) {
             // Grid Gallery web
             var galleryDiv = $('.gallery_wrapper');
             for (let index = 0; index < 5; index++) {
-
+                 var newDivHTML = '';
                 if(number_img[index]){
 
                     var ext = (number_img[index] < 10 ) ? '.L0'+(number_img[index]) : '.L'+(number_img[index]);
-                    var newDivHTML = `
+                     newDivHTML = `
                     <div class="col-md-4 image_gallery lightbox_trigger special_border_top" data-slider-no="${index+2}" style="background-image:url('${base_url+unique_id+ext}')">
                     <div class="img_listings_overlay"></div>
                     </div>
                     `;
                 
                     if(index == 4){
-                        var newDivHTML = `
+                         newDivHTML = `
                         <div class="col-md-4 image_gallery lightbox_trigger special_border_top" data-slider-no="${index+2}" style="background-image:url('${base_url+unique_id+ext}')">
                         <div class="img_listings_overlay img_listings_overlay_last"></div>
                         <span class="img_listings_mes">Ver todo ${number_img.length} fotos</span>
@@ -32,8 +32,8 @@ jQuery(document).ready(function($) {
                     $(galleryDiv).append(newDivHTML);
     
                 }else{
-                    var newDivHTML = `
-                    <div class="col-md-4 image_gallery lightbox_trigger special_border_top" data-slider-no="${index+2}" style="background-image:url('http://propiedadesnakama.test/wp-content/uploads/2023/06/LOGO-NAKAMA-HORIZONTAL-GRIS.png'); background-size:contain; background-repeat:no-repeat">
+                     newDivHTML = `
+                    <div class="col-md-4 image_gallery lightbox_trigger special_border_top" data-slider-no="${index+2}" style="background-image:url('https://propiedadesnakama.com/wp-content/uploads/2023/06/LOGO-NAKAMA-HORIZONTAL-GRIS.png'); background-size:contain; background-repeat:no-repeat">
                     <div class="img_listings_overlay"></div>
                     </div>
                     `;

@@ -106,11 +106,7 @@ class Import
         // echo $term_id;
         // Log::info('comodidades', $term_id);
 
-        }
-       
-            
-        // var_dump($term_ids);
-        
+        }   
         
         // Asigna los términos al post utilizando los IDs
         $result = wp_set_object_terms($post_id, $term_ids , $tax, false);
@@ -237,71 +233,6 @@ class Import
             return "Más de 3.000 m2";
         }
     }
-
-
-    // protected function get_post_galery_ids($id_unique, $multi_count, $post_galery_insert)
-    // {
-    //     $list_ids = [];
-    //     $save_post_galery_insert = true;
-    //     $cont_porcess = 1;
-
-    //     if (!empty($post_galery_insert)) {
-    //         $post_galery_insert = explode(',', $post_galery_insert); // Arreglo con los datos convertidos
-    //     }else{
-    //         $post_galery_insert = [];
-    //     }
-
-    //     $count_galery_insert = count($post_galery_insert);
-
-    //     for ($i=2; $i <= $multi_count ; $i++) {            
-    //         if($count_galery_insert >= ($multi_count - 1)){ // Verifico si cantidad de de imagenes insertadas es mayor o igual a las que se van a procesar, pare el proceso
-    //             $save_post_galery_insert = false;
-    //             break;
-    //         }
-    //         if($count_galery_insert >= 6){ //Validar que tengan N catidad o menos en la base de datos, si las tiene para el bucle
-    //             break;
-    //         }
-    //         if(!in_array($i,$post_galery_insert)){ //Se valida que solo ingrese los que no esten en el resultado de la base de datos 
-    //             if($cont_porcess > 2){ //Solo permitir N proceso para cargue de las imagenes
-    //                 break;
-    //             }
-    //             $ext = ($i < 10 ) ? '.L0'.$i : '.L'.$i;
-    //             $ruta_img = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.$ext;
-    //             if ( file_exists( $ruta_img ) ){
-    //                 $imagen_id = get_option('id_preview');
-    //                 if($i === 2){ //Si es la primer imagen, la tratamos de convertir a .jpeg
-    //                     $destination_path = IMPORTMLS_DIR . DIR_NAME_TEMP .'/'.$id_unique.'-L02.jpeg';
-    //                     $result = $this->convert_image_to_jpg($ruta_img, $destination_path);
-    //                     if (is_wp_error($result)) {
-    //                         Log::error('Hubo un error al convertir la imagen '.$id_unique.$ext);
-    //                     }else{
-    //                         $ruta_img = $destination_path;
-    //                     }
-    //                     $imagen_id = $this->load_image_and_get_id($ruta_img);
-    //                 }
-    //                 if ($imagen_id) {
-    //                     $list_ids[]= $imagen_id;
-    //                     $post_galery_insert[]= $i; //Agregamos el valor de $i al arreglo
-    //                 } else {
-    //                     // Log::error('Hubo un error al cargar la imagen en la galería.'.$i.' '.$id_unique );
-    //                 }
-    //                 $cont_porcess ++;
-    //             }else{
-    //                 // Log::info('La imagen '.$ruta_img.' no exixte para ser insertada en la galería.');
-    //             }
-    //         }
-
-    //     }
-        
-    //     if($save_post_galery_insert){
-    //         $post_galery_insert = implode(',', $post_galery_insert );//Lo convertimos en cadena nuevamente para poderlo guardar en la base de datos
-    //         $this->update_by_unique_id($id_unique,['post_galery_insert' => $post_galery_insert]);
-    //     }
-
-    //     $str_ids = implode(',', $list_ids );
-
-    //     return $str_ids;
-    // }
 
     /**
      * Carga una imagen desde una URL y obtiene su ID en la biblioteca de medios de WordPress.
@@ -533,6 +464,4 @@ class Import
     
         return $resultado !== false;
     }
-    
-
 }

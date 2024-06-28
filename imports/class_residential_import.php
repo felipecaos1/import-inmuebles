@@ -26,6 +26,11 @@ class ResidentialImport extends Import
         $ruta_feature_img = IMPORTMLS_DIR . DIR_NAME_TEMP.'/'.$data['unique_id'].'.L01';
 
         // $urba = ($data['subdivision'] !='No aplica')? $data['subdivision']:'';//urbanización
+        $monthly_assessment = '$0';
+        if (is_numeric($data['monthly_assessment'])) {
+            $monthly_assessment = '$' . number_format(intval($data['monthly_assessment']), 0, '.', '');
+        }
+        
         // Metacampos
         $meta_datos = array(
             'property_price' => $data['price_current']/1000000, //precio en millones
@@ -47,23 +52,9 @@ class ResidentialImport extends Import
             'property_latitude' =>$data['latitude'],//laitud de la propiedad 
             'property_longitude' =>$data['longitude'],//longitud de la propiedad
             'property_country' =>'Colombia',
-            'administracion'=>'$'.number_format($data['monthly_assessment'], 0, '.'),
+            'administracion'=> $monthly_assessment,
             // 'page_show_adv_search'=>'global',
             'page_use_float_search'=>'global',
-            
-
-            // 'topbar_transparent'=>'global',
-            // 'topbar_border_transparent'=>'global',
-            // 'sidebar_agent_option'=>'global',
-            // 'local_pgpr_slider_type'=>'global',
-            // 'local_pgpr_content_type'=>'global',
-            // 'header_transparent'=>'global',
-            // 'page_header_image_full_screen'=> 'yes',
-            // 'page_header_image_back_type'=> 'cover',
-            // 'post_show_title'=>'yes',
-            // 'sidebar_option' =>'right',
-            // 'sidebar_select' => 'primary-widget-area',
-            // -------------------------
             
             'is_mls' => true
         );
@@ -97,7 +88,7 @@ class ResidentialImport extends Import
             $post_data = array(
                 'ID'            => $post_id,
                 'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
-                // 'post_status'   => 'publish', 
+                'post_status'   => 'publish', 
                 'post_type'     => 'estate_property',
                 'post_content'  => $data['remarks_es'],
                 'meta_input'    => $meta_datos 
@@ -118,8 +109,8 @@ class ResidentialImport extends Import
          
             $post_data = array(
                 'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
-                // 'post_status'   => 'publish', 
-                'post_status'   => 'pending',
+                'post_status'   => 'publish', 
+                // 'post_status'   => 'pending',
                 'post_type'     => 'estate_property',
                 'post_content'  => $data['remarks_es'],
                 'meta_input'    => $meta_datos 
@@ -137,7 +128,26 @@ class ResidentialImport extends Import
                 //         $imagen_id = get_option('id_preview');
                 //         $result_thumb = set_post_thumbnail($post_id, $imagen_id);
                 //     }
-                // }                
+                // } 
+                
+                // Taxonomias =========================
+                // property_category: single: casa-apto,etc
+                $this->set_taxonomia($post_id, [$data['property_type']], 'property_category');
+                // property_action_category: single: compra-venta-nodisponible, se asigna por defecto Venta(id=51)
+                wp_set_object_terms($post_id, 51 , 'property_action_category', false);
+                // property_city: ciudades agrupadas
+                $this->set_taxonomia($post_id, [$data['district']], 'property_city');
+                // property_area: Barrio
+                $this->set_taxonomia($post_id, [$data['map_area']], 'property_area');
+                // property_county_state: "Medellín – Colombia"
+                $this->set_taxonomia($post_id, ['Colombia'], 'property_county_state');//optimizar
+                // property_features: amenities
+                // var_dump($this->get_amenities($data['interior_features'].','.$data['exterior_features']));
+                $this->set_taxonomia($post_id, $this->get_amenities($data['interior_features'].','.$data['exterior_features']), 'property_features');
+                
+                // property_status: vacio
+                $this->set_taxonomia($post_id, [$data['remodelled']], 'property_status');
+            
                 $this->update_by_unique_id($data['unique_id'],['post_created' => $post_id,'feature_img' => $result_feature_img]);
             } else {
                 $error_message = $post_id->get_error_message();
@@ -148,27 +158,10 @@ class ResidentialImport extends Import
         // Verificar si hay un post 
         if ($post_id) {
             
-            // Taxonomias
-            // property_category: single: casa-apto,etc
-            $this->set_taxonomia($post_id, [$data['property_type']], 'property_category');
-            // property_action_category: single: compra-venta-nodisponible, se asigna por defecto Venta(id=51)
-            wp_set_object_terms($post_id, 51 , 'property_action_category', false);
-            // property_city: ciudades agrupadas
-            $this->set_taxonomia($post_id, [$data['district']], 'property_city');
-            // property_area: Barrio
-            $this->set_taxonomia($post_id, [$data['map_area']], 'property_area');
-            // property_county_state: "Medellín – Colombia"
-            $this->set_taxonomia($post_id, ['Colombia'], 'property_county_state');//optimizar
-            // property_features: amenities
-            // var_dump($this->get_amenities($data['interior_features'].','.$data['exterior_features']));
-            $this->set_taxonomia($post_id, $this->get_amenities($data['interior_features'].','.$data['exterior_features']), 'property_features');
-            
-            // property_status: vacio
-            $this->set_taxonomia($post_id, [$data['remodelled']], 'property_status');
 
         } else {
             Log::error('Error, no hay un id para establecer las taxonomias');
-        }        
+        }   
     }
 
 }
