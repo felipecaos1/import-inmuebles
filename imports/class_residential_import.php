@@ -17,6 +17,9 @@ class ResidentialImport extends Import
      */
     public function crear_inmueble($data)
     {
+
+        $permitido = $this->esInmueblePermitido($data['region'],$data['district'], $data['status']);
+
         $this->inmueble = $this->get_by_unique_id($data['unique_id']);
         if(!$this->inmueble) {
             $this->inmueble = $this->insert_data_into_table($data['unique_id'],'residential');
@@ -30,6 +33,10 @@ class ResidentialImport extends Import
         if (is_numeric($data['monthly_assessment'])) {
             $monthly_assessment = '$' . number_format(intval($data['monthly_assessment']), 0, '.', '');
         }
+        $predial = '$0';
+        if (is_numeric($data['taxes'])) {
+            $monthly_assessment = '$' . number_format(intval($data['taxes']), 0, '.', '');
+        }
         
         // Metacampos
         $meta_datos = array(
@@ -41,8 +48,8 @@ class ResidentialImport extends Import
             'property_bathrooms' => $data['bathrooms'],//Baños
             'codigo-de-la-propiedad' => $data['id'],//Código de la propiedad
             'parqueadero' => $data['parking_spaces'],//parqueaderos
-            'ubicacion' => $data['street_name_es'].', '.$data['map_area'].', '.$data['district'],//Ubicación texto
-            'hidden_address' => $data['street_name_es'].', '.$data['map_area'].', '.$data['district'],//Ubicación completa
+            'ubicacion' => $data['district'].', '.$data['map_area'].' - '.$data['region'],//Ubicación texto
+            'hidden_address' => $data['district'].', '.$data['map_area'].' - '.$data['region'],//Ubicación completa
             'property_agent' =>'24509',//id agente encargado
             '_direccion' => $data['street_name_es'].', '.$data['map_area'].', '.$data['district'],
             '_yoast_wpseo_metadesc'=>'🏙️ Area m2: '.$data['sqft_total'].' m2 - ▶️ Valor: $'.$data['price_current'].' - 🛏️ Habitaciones: '.$data['bedrooms'].' - 🚘 Parq: '.$data['parking_spaces'],
@@ -53,6 +60,7 @@ class ResidentialImport extends Import
             'property_longitude' =>$data['longitude'],//longitud de la propiedad
             'property_country' =>'Colombia',
             'administracion'=> $monthly_assessment,
+            'predial'=> $predial,
             // 'page_show_adv_search'=>'global',
             'page_use_float_search'=>'global',
             
@@ -88,7 +96,7 @@ class ResidentialImport extends Import
             $post_data = array(
                 'ID'            => $post_id,
                 'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
-                'post_status'   => 'publish', 
+                'post_status'   => $permitido ? 'publish' : 'trash', 
                 'post_type'     => 'estate_property',
                 'post_content'  => $data['remarks_es'],
                 'meta_input'    => $meta_datos 
@@ -106,6 +114,9 @@ class ResidentialImport extends Import
         } else {
             
             // $meta_datos['image_to_attach'] =  $gallery_ids;
+            if(!$permitido){
+                return;
+            }
          
             $post_data = array(
                 'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
@@ -131,16 +142,17 @@ class ResidentialImport extends Import
                 // } 
                 
                 // Taxonomias =========================
-                // property_category: single: casa-apto,etc
-                $this->set_taxonomia($post_id, [$data['property_type']], 'property_category');
+                // property_county_state: "Medellín – Colombia"
+                $this->set_taxonomia($post_id, ['Colombia'], 'property_county_state');//optimizar
                 // property_action_category: single: compra-venta-nodisponible, se asigna por defecto Venta(id=51)
                 wp_set_object_terms($post_id, 51 , 'property_action_category', false);
+                
+                // property_category: single: casa-apto,etc
+                $this->set_taxonomia($post_id, [$data['property_type']], 'property_category');
                 // property_city: ciudades agrupadas
                 $this->set_taxonomia($post_id, [$data['district']], 'property_city');
                 // property_area: Barrio
                 $this->set_taxonomia($post_id, [$data['map_area']], 'property_area');
-                // property_county_state: "Medellín – Colombia"
-                $this->set_taxonomia($post_id, ['Colombia'], 'property_county_state');//optimizar
                 // property_features: amenities
                 // var_dump($this->get_amenities($data['interior_features'].','.$data['exterior_features']));
                 $this->set_taxonomia($post_id, $this->get_amenities($data['interior_features'].','.$data['exterior_features']), 'property_features');

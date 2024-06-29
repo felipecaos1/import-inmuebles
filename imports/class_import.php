@@ -1,6 +1,46 @@
 <?php
 class Import
 {
+
+    /**
+     * Establece la imagen destacada del post 
+     *
+     * @param string $ruta_feature_img | int $post_id recibe la ruta de la imagen y el id del post
+     * @return true | false 
+     */
+
+    protected function esInmueblePermitido($zona, $municipio, $status) {
+
+        if ($status !== 'Activo' && $status !== 'Opcionado') {
+            return false;
+        }
+
+        $permitidos = false;
+    
+
+        switch ($zona) {
+            case 'Poblado':
+                $permitidos = true;
+                break;
+            case 'Aburra Sur':
+                $municipiosNoPermitidos = ['Caldas', 'San Antonio Prado', 'Pacora', 'Santo domingo'];
+                if (!in_array($municipio, $municipiosNoPermitidos)) {
+                    $permitidos = true;
+                }
+                break;
+            case 'Oriente Antioqueño':
+                $municipiosPermitidos = ['Rionegro', 'La Ceja', 'El Retiro', 'El Carmen', 'Guarne'];
+                if (in_array($municipio, $municipiosPermitidos)) {
+                    $permitidos = true;
+                }
+                break;
+            default:
+                $permitidos = false;
+                break;
+        }
+    
+        return $permitidos;
+    }
     /**
      * Establece la imagen destacada del post 
      *
