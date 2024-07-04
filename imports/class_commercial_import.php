@@ -17,8 +17,14 @@ class CommercialImport extends Import
      */
     public function crear_inmueble($data)
     {
+        $permitido = $this->esInmueblePermitido($data['region'],$data['district'], $data['status']);
+
         $this->inmueble = $this->get_by_unique_id($data['unique_id']);
         if(!$this->inmueble) {
+            if(!$permitido){
+                Log::info('No creado', $data['id']);
+                return false;
+            }
             $this->inmueble = $this->insert_data_into_table($data['unique_id'],'commercial');
         }
         
@@ -30,6 +36,15 @@ class CommercialImport extends Import
         $data['bedrooms'] = 0;
         // - bathrooms no llega
         $data['bathrooms'] = 0;
+
+        $monthly_assessment = '$0';
+        if (is_numeric($data['monthly_assessment'])) {
+            $monthly_assessment = '$' . number_format(intval($data['monthly_assessment']), 0, '.', '');
+        }
+        // $predial = '$0';
+        // if (is_numeric($data['taxes'])) {
+        //     $predial = '$' . number_format(intval($data['taxes']), 0, '.', '');
+        // }
         
         // Metacampos
         $meta_datos = array(
@@ -41,7 +56,7 @@ class CommercialImport extends Import
             'property_bathrooms' => $data['bathrooms'],//Baños
             'codigo-de-la-propiedad' => $data['id'],//Código de la propiedad
             'parqueadero' => $data['parking_spaces'],//parqueaderos
-            'ubicacion' => $data['street_name_es'].', '.$data['map_area'].', '.$data['district'],//Ubicación texto
+            'ubicacion' => $data['district'].', '.$data['map_area'].' - '.$data['region'],//Ubicación texto
             'hidden_address' => $data['street_name_es'].', '.$data['map_area'].', '.$data['district'],//Ubicación completa
             'property_agent' =>'24509',//id agente encargado
             '_direccion' => $data['street_name_es'].', '.$data['map_area'].', '.$data['district'],
@@ -52,7 +67,8 @@ class CommercialImport extends Import
             'property_latitude' =>$data['latitude'],//laitud de la propiedad 
             'property_longitude' =>$data['longitude'],//longitud de la propiedad
             'property_country' =>'Colombia',
-            'administracion'=>'$'.number_format($data['monthly_assessment'], 0, '.'),
+            'administracion'=>$monthly_assessment,
+            // 'predial'=>$predial,
             // 'page_show_adv_search'=>'global',
             'page_use_float_search'=>'global',
             
@@ -60,7 +76,9 @@ class CommercialImport extends Import
         );
 
         // funcion para crear un array con los id de las imagenes
-        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
+        if($permitido){
+            $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
+        }
 
         if ($this->inmueble->post_created) {
             // Actualiza el post existente
@@ -87,7 +105,7 @@ class CommercialImport extends Import
             $post_data = array(
                 'ID'            => $post_id,
                 'post_title'    => $data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
-                'post_status'   => 'publish', 
+                'post_status'   => $permitido ? 'publish' : 'trash', 
                 'post_type'     => 'estate_property',
                 'post_content'  => $data['remarks_es'],
                 'meta_input'    => $meta_datos 
@@ -105,11 +123,12 @@ class CommercialImport extends Import
         }else{
             
             // $meta_datos['galeria-de-imagenes'] =  $gallery_ids;
+           
 
             $post_data = array(
                 'post_title'    =>$data['commercial_type'].' en '.$data['map_area'].' - '.$data['district'].' - '. $data['id'],
                 'post_status'   => 'publish', 
-                'post_status'   => 'pending', 
+                // 'post_status'   => 'pending', 
                 'post_type'     => 'estate_property',
                 'post_content'  => $data['remarks_es'],
                 'meta_input'    => $meta_datos 

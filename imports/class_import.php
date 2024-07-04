@@ -12,6 +12,7 @@ class Import
     protected function esInmueblePermitido($zona, $municipio, $status) {
 
         if ($status !== 'Activo' && $status !== 'Opcionado') {
+            Log::info('Inmueble no permitiddo', $zona.'-'.$municipio.'-'.$status);
             return false;
         }
 
@@ -26,16 +27,21 @@ class Import
                 $municipiosNoPermitidos = ['Caldas', 'San Antonio Prado', 'Pacora', 'Santo domingo'];
                 if (!in_array($municipio, $municipiosNoPermitidos)) {
                     $permitidos = true;
+                }else{
+                    Log::info('Inmueble no permitiddo', $zona.'-'.$municipio.'-'.$status);
                 }
                 break;
             case 'Oriente Antioqueño':
                 $municipiosPermitidos = ['Rionegro', 'La Ceja', 'El Retiro', 'El Carmen', 'Guarne'];
                 if (in_array($municipio, $municipiosPermitidos)) {
                     $permitidos = true;
+                }else{
+                    Log::info('Inmueble no permitiddo', $zona.'-'.$municipio.'-'.$status);
                 }
                 break;
             default:
                 $permitidos = false;
+                Log::info('Inmueble no permitiddo', $zona.'-'.$municipio.'-'.$status);
                 break;
         }
     

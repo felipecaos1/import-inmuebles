@@ -22,6 +22,10 @@ class ResidentialImport extends Import
 
         $this->inmueble = $this->get_by_unique_id($data['unique_id']);
         if(!$this->inmueble) {
+            if(!$permitido){
+                Log::info('No creado', $data['id']);
+                return false;
+            }
             $this->inmueble = $this->insert_data_into_table($data['unique_id'],'residential');
         }
         
@@ -35,7 +39,7 @@ class ResidentialImport extends Import
         }
         $predial = '$0';
         if (is_numeric($data['taxes'])) {
-            $monthly_assessment = '$' . number_format(intval($data['taxes']), 0, '.', '');
+            $predial = '$' . number_format(intval($data['taxes']), 0, '.', '');
         }
         
         // Metacampos
@@ -68,7 +72,9 @@ class ResidentialImport extends Import
         );
 
         // funcion para crear un array con los id de las imagenes
-        $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
+        if($permitido){
+            $gallery_ids = $this->get_post_galery_ids($data['unique_id'],$data['listing_photo_count'],$this->inmueble->post_galery_insert);
+        }
         
         if ($this->inmueble->post_created) {
             // Actualiza el post existente
@@ -114,10 +120,6 @@ class ResidentialImport extends Import
         } else {
             
             // $meta_datos['image_to_attach'] =  $gallery_ids;
-            if(!$permitido){
-                return;
-            }
-         
             $post_data = array(
                 'post_title'    => $data['property_type'].' en '.$data['map_area'].' - '.$data['district'].' - '.$data['id'],
                 'post_status'   => 'publish', 
