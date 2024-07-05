@@ -144,8 +144,7 @@ class ResidentialImport extends Import
                 // } 
                 
                 // Taxonomias =========================
-                // property_county_state: "Medellín – Colombia"
-                $this->set_taxonomia($post_id, ['Colombia'], 'property_county_state');//optimizar
+                
                 // property_action_category: single: compra-venta-nodisponible, se asigna por defecto Venta(id=51)
                 wp_set_object_terms($post_id, 51 , 'property_action_category', false);
                 
@@ -171,8 +170,9 @@ class ResidentialImport extends Import
 
         // Verificar si hay un post 
         if ($post_id) {
+            // property_county_state: "Medellín – Colombia"
+            $this->set_taxonomia($post_id, [$data['region']], 'property_county_state');//optimizar       
             
-
         } else {
             Log::error('Error, no hay un id para establecer las taxonomias');
         }   

@@ -159,8 +159,7 @@ class CommercialImport extends Import
                 $this->set_taxonomia($post_id, [$data['district']], 'property_city');
                 // property_area: Barrio
                 $this->set_taxonomia($post_id, [$data['map_area']], 'property_area');
-                // property_county_state: "Medellín – Colombia"
-                $this->set_taxonomia($post_id, ['Colombia'], 'property_county_state');//optimizar
+                
                 // property_features: amenities
                 // var_dump($this->get_amenities($data['interior_features'].','.$data['exterior_features']));
                 $this->set_taxonomia($post_id, $this->get_amenities($data['interior_features'].','.$data['exterior_features']), 'property_features');
@@ -178,7 +177,8 @@ class CommercialImport extends Import
 
         // Verificar si hay un post 
         if ($post_id) {
-                      
+            // property_county_state: "Medellín – Colombia"
+            $this->set_taxonomia($post_id, [$data['region']], 'property_county_state');//optimizar
         } else {
             Log::error('Error, no hay un id para establecer las taxonomias');
         }        
